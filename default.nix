@@ -10,6 +10,9 @@
 let
   callPackage = nixpkgs.lib.callPackageWith (nixpkgs // pkgs // { inherit nixpkgs; });
   pkgs = rec {
+    buildRubyGem = callPackage ./development/ruby/gem { };
+    bundlerEnv = nixpkgs.bundlerEnv.override { inherit callPackage; };
+
     passenger = callPackage ./servers/passenger { };
     nginx-mod-passenger = callPackage ./servers/nginx-mod-passenger.nix { };
     nginx-with-passenger = callPackage ./servers/nginx-with-passenger.nix { };
