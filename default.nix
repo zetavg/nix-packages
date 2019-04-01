@@ -10,5 +10,8 @@
 let
   callPackage = nixpkgs.lib.callPackageWith (nixpkgs // pkgs // { inherit nixpkgs; });
   pkgs = rec {
+    passenger = callPackage ./servers/passenger { };
+    nginx-mod-passenger = callPackage ./servers/nginx-mod-passenger.nix { };
+    nginx-with-passenger = callPackage ./servers/nginx-with-passenger.nix { };
   };
 in nixpkgs // pkgs

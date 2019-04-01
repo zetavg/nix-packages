@@ -1,0 +1,11 @@
+--- ./src/ruby_supportlib/phusion_passenger/config/agent_compiler.rb
++++ ./src/ruby_supportlib/phusion_passenger/config/agent_compiler-patched.rb
+@@ -110,7 +110,7 @@
+
+       def confirm_enable_optimizations
+         if @auto
+-          if @optimize
++          if ENV['PASSENGER_AGENT_OPTIMIZE'] == "true"
+             puts "Compiling with optimizations."
+           else
+             puts "Not compiling with optimizations."

@@ -1,0 +1,29 @@
+--- ./src/ruby_supportlib/phusion_passenger/config/installation_utils.rb
++++ ./src/ruby_supportlib/phusion_passenger/config/installation_utils-patch.rb
+@@ -56,7 +56,7 @@
+             return PhusionPassenger.support_binaries_dir
+           end
+
+-          if Process.euid == 0
++          if true
+             if result == false
+               print_installation_error_header
+               render_template 'installation_utils/support_binaries_dir_not_writable_despite_running_as_root',
+@@ -72,7 +72,7 @@
+             return find_or_create_writable_user_support_binaries_dir!
+           end
+         else
+-          if Process.euid == 0
++          if true
+             mkdir_p_preserve_parent_owner(PhusionPassenger.support_binaries_dir)
+             return PhusionPassenger.support_binaries_dir
+           else
+@@ -234,7 +234,7 @@
+           if !subpath.exist?
+             stat = subpath.parent.stat
+             Dir.mkdir(subpath.to_s)
+-            if Process.euid == 0
++            if true
+               File.lchown(stat.uid, stat.gid, subpath.to_s)
+             end
+           end

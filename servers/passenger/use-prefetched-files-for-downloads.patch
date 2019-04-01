@@ -1,0 +1,47 @@
+--- ./src/ruby_supportlib/phusion_passenger/utils/download.rb
++++ ./src/ruby_supportlib/phusion_passenger/utils/download.rb
+@@ -68,23 +68,27 @@
+         }.merge(options)
+         logger = options[:logger] || Logger.new(STDERR)
+
+-        if options[:use_cache] && cache_dir = PhusionPassenger.download_cache_dir
+-          basename = basename_from_url(url)
+-          if File.exist?("#{cache_dir}/#{basename}")
+-            logger.info "Copying #{basename} from #{cache_dir}..."
+-            FileUtils.cp("#{cache_dir}/#{basename}", output)
+-            return true
+-          end
+-        end
+-
+-        if PlatformInfo.find_command("curl")
+-          return download_with_curl(logger, url, output, options)
+-        elsif PlatformInfo.find_command("wget")
+-          return download_with_wget(logger, url, output, options)
+-        else
+-          logger.error "Could not download #{url}: no download tool found (curl or wget required)"
+-          return false
+-        end
++        require 'json'
++        available_binaries = JSON.parse(ENV['PREFETCHED_FILES_JSON'])
++        has_available_binary = available_binaries.key? url
++
++        unless has_available_binary
++          logger.info "No avaliable binary downloaded for #{url}"
++          return false
++        end
++
++        src = available_binaries[url]
++
++        unless File.exist?(src)
++          logger.info "Cannot find downloaded binary at #{src}"
++          return false
++        end
++
++        logger.info "Copying #{src} to #{output}..."
++        FileUtils.cp(src, output)
++        puts PhusionPassenger.support_binaries_dir
++
++        return true
+       end
+
+     private
