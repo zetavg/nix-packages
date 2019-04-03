@@ -18,6 +18,10 @@ let
   pkgs = rec {
     inherit lib;
 
+    npm = callPackage ./pkgs/development/nodejs/npm { };
+    mkNodeEnvDerivation = npm.mkNodeEnv;
+    mkNpmPackageDerivation = npm.mkNpmPackageWithEnv;
+
     buildRubyGem = callPackage ./pkgs/development/ruby/gem { };
     bundlerEnv = nixpkgs.bundlerEnv.override { inherit callPackage; };
     buildRailsApp = callPackage ./pkgs/development/ruby/rails-app { };
