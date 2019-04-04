@@ -1,7 +1,7 @@
 {
-  stdenv,
-  system,
   lib,
+  system,
+  stdenv,
   fetchurl,
   ruby,
   bundler,
@@ -130,4 +130,11 @@ in stdenv.mkDerivation rec {
   preFixup = ''
     echo "${generateLocationsIni "$out"}" > "$out/src/ruby_supportlib/phusion_passenger/locations.ini"
   '';
+
+  meta = with lib; {
+    description = "A fast and robust web application server for Ruby, Python and Node.js that runs and automanages your apps with ease";
+    homepage    = https://www.phusionpassenger.com/;
+    license     = licenses.mit;
+    platforms   = platforms.all;
+  };
 }
