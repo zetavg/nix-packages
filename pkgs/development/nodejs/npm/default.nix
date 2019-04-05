@@ -1,308 +1,333 @@
-{ system, lib, stdenv, bash, coreutils, rsync, ... }:
+{ lib, system, stdenv, bash, coreutils, gnutar, gzip, bzip2, rsync, ... }:
 
 let
-  inherit (builtins) replaceStrings;
-  inherit (lib) optionalString join;
+  inherit (builtins) map filter stringLength isAttrs attrNames;
+  inherit (lib) mapAttrsToList optionalString join;
+  getNameFromAttrs = { name, version, ... }: "${name}-${version}";
+  getNameWithNodePrefixFromAttrs = { name, version, ... }: "nodejs-${name}-${version}";
+  getNameWithNodejsVersionFromAttrs = { nodejs,name, version, ... }: "${nodejs.name}-${name}-${version}";
+  prepareBuildScript = ''
+    set -e
+    unset PATH
+    for p in $buildInputs; do
+      export PATH=$p/bin''${PATH:+:}$PATH
+    done
+  '';
+  packageNameFileName = ".package-name";
+  notBuiltIndicationFileName = ".not-built";
 in rec {
-  stripPackageName = replaceStrings [ "/" ] [ ":" ];
-  getPackageNameWithVersion = { packageName, version, ... }: "${stripPackageName packageName}-${version}";
-  getPackageFullName = { nodejs, packageName, version, ... }@attrs: "${nodejs.name}-${getPackageNameWithVersion attrs}";
-
-  # TODO: If we can get whether a package needs to be build or not (have
-  # nixbuild preinstall install postinstall) through nix, then a bunch of src
-  # derivations can be directly use as the built ones, since they have no
-  # differences.
-
-  # Make derivation to build the source of a npm package
-  # (i.e. just download the package without building it)
-  mkNpmPackageSource = {
-    nodejs,
+  mkNpmPackageWithoutBuild = {
+    # Package Info
+    name,
     packageName,
     version,
     src,
+    bin ? null,
+    buildNeeded ? false,
     ...
-  }: let
-    name = "npm-${stripPackageName packageName}-${version}-src";
-  in stdenv.mkDerivation {
-    inherit name packageName src;
-    buildInputs = [ nodejs coreutils rsync ];
-    phases = [ "unpackPhase" "patchPhase" "installPhase" ];
-    patchPhase = ''
-      patchShebangs .
-    '';
-    installPhase = ''
+  } @ attrs: let
+    name = getNameWithNodePrefixFromAttrs attrs;
+    bins = if isAttrs bin then attrNames bin else [];
+    binDataList = if isAttrs bin
+      then mapAttrsToList (name: path: "${name}|${path}") bin
+      else [];
+    buildScript = prepareBuildScript + ''
+      # Create output dir
       mkdir -p "$out/$packageName"
-      rsync -a . "$out/$packageName/" \
-        --exclude=/.*.swp \
-        --exclude=/._* \
-        --exclude=/.DS_Store \
-        --exclude=/.git \
-        --exclude=/.hg \
-        --exclude=/.npmrc \
-        --exclude=/.lock-wscript \
-        --exclude=/.svn \
-        --exclude=/.wafpickle-* \
-        --exclude=/config.gypi \
-        --exclude=/CVS \
-        --exclude=/npm-debug.log \
-        --filter='dir-merge,- .npmignore'
 
-      echo "$packageName" > "$out/package-name"
-      echo "true" > "$out/not-built"
+      # Write data
+      echo "$packageName" > "$out/${packageNameFileName}"
 
-      binsToLink=($(node "$getBinsScript" "$out/$packageName"))
-      for b in $binsToLink; do
+      # Unpack and move the source to "$out/$packageName"
+      # If is dir, use rsync to copy files
+      if [ -d "$src" ]; then
+        # TODO: Support general npm exclude rules
+        rsync -a "$src/." "$out/$packageName/" \
+          --exclude=/.*.swp \
+          --exclude=/._* \
+          --exclude=/.DS_Store \
+          --exclude=/.git \
+          --exclude=/.hg \
+          --exclude=/.npmrc \
+          --exclude=/.lock-wscript \
+          --exclude=/.svn \
+          --exclude=/.wafpickle-* \
+          --exclude=/config.gypi \
+          --exclude=/CVS \
+          --exclude=/npm-debug.log \
+          --filter='dir-merge,- .npmignore'
+      # Not dir, assume it's a tarball
+      else
+        # Try to unpack
+        case "$src" in
+          *.tar | *.tar.* | *.tgz | *.tbz2 | *.tbz)
+            # GNU tar can automatically select the decompression method
+            # (info "(tar) gzip").
+            # Add --warning=no-unknown-keyword to suppress messages like
+            # tar: Ignoring unknown extended header keyword 'NODETAR...'
+            tar xf "$src" --warning=no-unknown-keyword
+            ;;
+          *)
+            echo "don't know how to unpack $src"
+            exit 1
+            ;;
+        esac
+        # Move to out
+        for i in *; do
+          if [ -d "$i" ]; then
+            rm -rf "$out/$packageName"
+            mv -f "$i" "$out/$packageName"
+            break
+          fi
+        done
+      fi
+
+      # Link bins
+      for b in $binDataList; do
         IFS='|' read -r -a arr <<< "$b"
         binName=''${arr[0]}
         binPath=''${arr[1]}
-        echo "  $packageName link-bin: $binName -> $binPath"
-        mkdir -p "$out/bin"
-        cd "$out/bin"
+        mkdir -p "$out/.bin"
+        cd "$out/.bin"
         ln -sf "../$packageName/$binPath" "$binName"
         chmod +x "$binName"
         cd -
       done
+    '' + optionalString (buildNeeded == true) ''
+      echo true > "$out/${notBuiltIndicationFileName}"
     '';
-    getBinsScript = ./get-bins.js;
-  } // { inherit nodejs packageName; };
-
-  # Make derivation to build the source of a npm package, with dependencies
-  # included (i.e. just download the package without building it)
-  mkNpmPackageSourceWithDeps = {
-    nodejs,
-    packageName,
-    version,
-    src,
-    dependencies ? [],
-    ...
-  } @ attrs: let
-    source = mkNpmPackageSource attrs;
-    dependencyNames = map (d: getPackageNameWithVersion d) dependencies;
-    # TODO: If dependencyNames length > 4, just use "with-deps"
-    postfix = "with-${join "-" dependencyNames}";
-    name = "npm-${stripPackageName packageName}-${version}-src-${postfix}";
-    nodeEnv = mkNodeEnv {
-      dontbuild = true;
-      name = "${name}-tmp-node-env";
-      inherit nodejs dependencies;
-    };
-  in if (dependencies == []) then source else derivation {
-    inherit system name nodeEnv;
-    package = source;
+  in derivation {
+    inherit system name;
+    inherit packageName src binDataList;
     builder = "${bash}/bin/bash";
-    buildInputs = [ coreutils ];
-    args = [ ./build-with-deps.sh ];
-  } // { inherit nodejs packageName dependencyNames; };
+    buildInputs = [
+      bash
+      coreutils
+      rsync
+      gnutar gzip bzip2.bin
+    ];
+    args = [ "-c" buildScript ];
+  } // { inherit packageName bins; nodejs = null; };
 
-  # Make derivation to build a npm package
   mkNpmPackage = {
+    # Node.js
     nodejs,
+
+    # Package Info
+    name,
     packageName,
     version,
     src,
+    bin ? null,
+    buildNeeded ? false,
+
+    # Environment Required For Building
     buildEnv ? null,
     ...
   } @ attrs: let
-    name = getPackageFullName attrs;
-    source = mkNpmPackageSource attrs;
-    buildScript = ''
-      set -e
-
-      unset PATH
-      for p in $buildInputs; do
-        export PATH=$p/bin''${PATH:+:}$PATH
-      done
-
-      # Unpack
-      cp -r "$source" "$TMPDIR/build"
+    name = getNameWithNodejsVersionFromAttrs attrs;
+    packageWithoutBuild = mkNpmPackageWithoutBuild attrs;
+    buildScript = prepareBuildScript + ''
+      # Get Source
+      cp -r "$packageWithoutBuild" "$TMPDIR/build"
       chmod -R +w "$TMPDIR/build"
 
-      # Configure
-      export pathToPackage="$(cat "$TMPDIR/build/package-name")"
+      # Prepare Build Environment
+      export pathToPackage="$(cat "$TMPDIR/build/${packageNameFileName}")"
     '' + optionalString (buildEnv != null) ''
       source "$buildEnv/env.sh"
-      # TODO: Delete the following lines
-      # export PATH="$PATH:$(cat "$buildEnv/PATH")"
-      # export NODE_PATH="$(cat "$buildEnv/NODE_PATH")"
     '' + ''
 
       # Build
       cd "$TMPDIR/build/$pathToPackage"
-      npm run nixbuild --if-present --no-update-notifier
+      npm run nix-preinstall --if-present --no-update-notifier
       npm run preinstall --if-present --no-update-notifier
       npm run install --if-present --no-update-notifier
       npm run postinstall --if-present --no-update-notifier
+      npm run nix-postinstall --if-present --no-update-notifier
       cd -
-      rm -rf "$TMPDIR/build/not-built"
+      rm -rf "$TMPDIR/build/${notBuiltIndicationFileName}"
 
       # Install
       cp -r "$TMPDIR/build" "$out"
     '';
-  in derivation {
-    inherit system name source buildEnv;
+  in if buildNeeded != true then packageWithoutBuild else derivation {
+    inherit system name;
+    inherit packageWithoutBuild buildEnv;
     builder = "${bash}/bin/bash";
     buildInputs = [
       # TODO: Might need more stuff for building nodejs native dependencies
       bash coreutils nodejs
     ];
     args = [ "-c" buildScript ];
-  } // { inherit nodejs packageName; };
+  } // {
+    inherit nodejs;
+    inherit (packageWithoutBuild) packageName bins;
+  };
 
   # Make derivation to build a npm package, with dependencies included
   mkNpmPackageWithDeps = {
+    # Node.js
     nodejs,
+
+    # Options
+    production ? true,
+    dontbuild ? false,
+
+    # Package Info
+    name,
     packageName,
     version,
     src,
-    buildEnv ? null,
+    bin ? null,
+    buildNeeded ? false,
+
+    # Dependencies
     dependencies ? [],
+    devDependencies ? [],
     ...
   } @ attrs: let
-    package = mkNpmPackage attrs;
-    dependencyNames = map (d: getPackageNameWithVersion d) dependencies;
-    # TODO: If dependencyNames length > 4, just use "with-deps"
-    postfix = "with-${join "-" dependencyNames}";
-    name = "${getPackageFullName attrs}-${postfix}";
+    mkPkg = if dontbuild then mkNpmPackageWithoutBuild else mkNpmPackage;
+    package = mkPkg attrs;
+    includedDependencies = if production then dependencies else dependencies ++ devDependencies;
+    dependencyNames = map getNameFromAttrs includedDependencies;
+    nameDependenciesPostfix = "${join "+" dependencyNames}";
+    namePostfix = if (stringLength nameDependenciesPostfix > 128)
+      then "some-deps"
+      else nameDependenciesPostfix;
+    name = "${getNameWithNodejsVersionFromAttrs attrs}+${namePostfix}";
     nodeEnv = mkNodeEnv {
-      name = "${name}-tmp-node-env";
-      inherit nodejs dependencies;
+      name = "tmp-env-for-building-${name}";
+      inherit nodejs dependencies devDependencies production dontbuild;
     };
-  in if (dependencies == []) then package else derivation {
-    inherit system name package nodeEnv;
-    builder = "${bash}/bin/bash";
-    buildInputs = [ coreutils ];
-    args = [ ./build-with-deps.sh ];
-  } // { inherit nodejs packageName dependencyNames; };
-
-  # Make derivation to build a npm package, with the environment included
-  # TODO: If production mode, build nodeEnvDev only for build
-  mkNpmPackageWithEnv = {
-    nodejs,
-    packageName,
-    version,
-    src,
-    buildEnv ? null,
-    ...
-  } @ attrs: let
-    source = mkNpmPackageSource attrs;
-    name = "${getPackageFullName attrs}-with-env";
-    nodeEnv = mkNodeEnv (attrs // {
-      name = "${name}-node-env";
-    });
-  in stdenv.mkDerivation {
-    inherit name nodeEnv source;
-    buildInputs = [
-      # TODO: Might need more stuff for building nodejs native dependencies
-      bash coreutils nodejs
-    ];
-    shellHook = ''
-      source "$nodeEnv/env.sh"
-    '';
-    phases = [ "unpackPhase" "buildPhase" "installPhase" "fixupPhase" ];
-    unpackPhase = ''
-      cp -r "$source" "$TMPDIR/build"
-      chmod -R +w "$TMPDIR/build"
-    '';
-    buildPhase = ''
-      export pathToPackage="$(cat "$TMPDIR/build/package-name")"
-      source "$nodeEnv/env.sh"
-
-      cd "$TMPDIR/build/$pathToPackage"
-      npm run nixbuild --if-present --no-update-notifier
-      npm run preinstall --if-present --no-update-notifier
-      npm run install --if-present --no-update-notifier
-      npm run postinstall --if-present --no-update-notifier
-      cd -
-      rm -rf "$TMPDIR/build/not-built"
-    '';
-    installPhase = ''
-      cp -r "$TMPDIR/build" "$out"
-    '';
-    # TODO: Patch all require('...') to absolute path, by this way we can
-    # support the package to be required in another node project? No we can't
-    # do this because the packages used by this package will broke due to the
-    # lack of NODE_PATH.
-    # The best way seems to be decoupling the pure package and it's
-    # dependencies, so the pure package can be re-used in other projects
-    # without dragging a bunch of its own dependencies that might not be used.
-    # And let nix check for a default.nix or npm-package.nix after fetching the
-    # source and determine to build it via nix or npm?
-    # We need to leave the dependency resolution to npm. Hopefully npm can get
-    # the package.json through a git or file source, while nix can do the
-    # installation.
-    fixupPhase = ''
+    buildScript = prepareBuildScript + ''
+      mkdir -p "$out"
       cd "$out"
-      if [[ -d bin ]]; then
-        mv bin .bin
+
+      cp -rf "$package/"* .
+
+      mkdir node_modules
+      cd node_modules
+      rm -rf ${packageNameFileName}
+      IFS=':' read -r -a nodePath <<< "$(cat "$nodeEnv/NODE_PATH")"
+      for pkg in $nodePath; do
+        rsync -a "$pkg/." ./
+      done
+    '';
+  in if (includedDependencies == []) then package else derivation {
+    inherit system name;
+    inherit package nodeEnv;
+    builder = "${bash}/bin/bash";
+    buildInputs = [ coreutils rsync ];
+    args = [ "-c" buildScript ];
+  } // {
+    inherit (package) nodejs packageName bins;
+    inherit includedDependencies nodeEnv;
+  };
+
+  mkNpmPackageWithRuntime = attrs: let
+    name = "${getNameWithNodejsVersionFromAttrs attrs}+runtime";
+    package = mkNpmPackage (attrs // { buildNeeded = true; });
+    nodeEnv = mkNodeEnv attrs;
+    nodeDevEnv = mkNodeEnv (attrs // { production = false; });
+    buildScript = prepareBuildScript + ''
+      mkdir -p "$out"
+      cd "$out"
+
+      # Link all files from the package
+      for path in "$package/"*; do
+        ln -sf "$path" .
+      done
+
+      # Link bins from the package
+      ln -sf "$package/.bin" .
+
+      # Generate binstubs
+      if [[ -d .bin ]]; then
         mkdir bin
-        for b in .bin/*; do
-          binName="$(basename $b)"
-          echo "#!/usr/bin/env bash" >> "bin/$binName"
-          echo "source '$nodeEnv/env.sh'" >> "bin/$binName"
+        for binFile in .bin/*; do
+          binName="$(basename $binFile)"
+          echo "#!${bash}/bin/bash" >> "bin/$binName"
+          echo "source '${nodeEnv}/env.sh'" >> "bin/$binName"
           echo "\"\$(\"${coreutils}/bin/dirname\" \$(\"${coreutils}/bin/realpath\" \"\$0\"))/../.bin/$binName\" \"\$@\"" >> "bin/$binName"
           chmod +x "bin/$binName"
         done
-        patchShebangs bin
       fi
       cd -
     '';
-  } // { inherit nodeEnv; inherit (nodeEnv) nodePath path dependencies; };
+  in derivation {
+    inherit system name;
+    inherit package;
+    builder = "${bash}/bin/bash";
+    buildInputs = [ bash coreutils ];
+    args = [ "-c" buildScript ];
+  } // {
+    inherit package;
+    inherit (package) nodejs packageName bins;
+    inherit nodeEnv;
+    inherit (nodeEnv) nodePath path;
+    shell = stdenv.mkDerivation {
+      name = "${name}-shell";
+      phases = [ ];
+      inherit nodeDevEnv;
+      shellHook = ''
+        source $nodeDevEnv/env.sh
+      '';
+    };
+  };
 
-  # Make derivation to build a node environment
-  # TODO: If production mode, filter the dependencies
   mkNodeEnv = {
+    # Node.js
     nodejs,
-    name,
-    dependencies ? [],
+
+    # Options
+    production ? true,
     dontbuild ? false,
+
+    # Env Info
+    name,
+
+    # Dependencies
+    dependencies ? [],
+    devDependencies ? [],
     ...
   }: let
-    mkPkg = if dontbuild then mkNpmPackageSourceWithDeps else mkNpmPackageWithDeps;
-    mkNpmPackageAdditionalAttrs = {
-      inherit nodejs;
+    includedDependencies = if production then dependencies else dependencies ++ devDependencies;
+    mkPkgAdditionalAttrs = {
+      inherit nodejs production dontbuild;
+      # TODO: Add devBuildEnv to support pacakgeing npm packages with nix
       buildEnv = mkNodeEnv {
-        inherit nodejs dependencies;
+        inherit nodejs production dependencies devDependencies;
         dontbuild = true;
-        name = "${name}-build-env";
+        name = "tmp-build-env-for-${name}";
       };
     };
-    deps = map ({ packageName, ... }@attrs: mkPkg (attrs // mkNpmPackageAdditionalAttrs)) dependencies;
+    deps = map (attrs: mkNpmPackageWithDeps (attrs // mkPkgAdditionalAttrs)) includedDependencies;
+
     nodePath = join ":" deps;
-    path = join ":" (map (d: "${d}/bin") deps);
-    buildScript = ''
-      set -e
-
-      unset PATH
-      for p in $buildInputs; do
-        export PATH=$p/bin''${PATH:+:}$PATH
-      done
-
+    depsThatHaveBins = filter (d: (d.bins or []) != []) deps;
+    path = join ":" ([ "${bash}/bin" "${nodejs}/bin" ] ++ (map (d: "${d}/.bin") depsThatHaveBins));
+    buildScript = prepareBuildScript + ''
       mkdir -p "$out"
 
       echo "$nodePath" > "$out/NODE_PATH"
-      echo "$path" > "$out/PATH_UNFILTERED"
+      echo "$path" > "$out/PATH"
 
-      unset path_filtered
-      for dep in $deps; do
-        if [[ -d "$dep/bin" ]]; then
-          path_filtered=$dep/bin''${path_filtered:+:}$path_filtered
-        fi
-      done
-
-      echo "$path_filtered" > "$out/PATH"
-
-      echo "export PATH=$path_filtered\''${PATH:+:}\$PATH" >> "$out/env.sh"
+      echo "export PATH=$path\''${PATH:+:}\$PATH" >> "$out/env.sh"
       echo "export NODE_PATH=$nodePath" >> "$out/env.sh"
     '' + optionalString dontbuild ''
-      echo "true" > "$out/not-built"
+      echo "true" > "$out/${notBuiltIndicationFileName}"
     '';
   in derivation {
-    inherit system name deps nodePath path;
+    inherit system name;
+    inherit deps nodePath path;
     builder = "${bash}/bin/bash";
-    buildInputs = [
-      coreutils nodejs
-    ];
-    getBinsScript = ./get-bins.js;
+    buildInputs = [ coreutils ];
     args = [ "-c" buildScript ];
-  } // { inherit nodePath path; dependencies = deps; };
+  } // {
+    inherit nodejs;
+    inherit nodePath path;
+    inherit dependencies devDependencies includedDependencies;
+    inherit production dontbuild;
+  };
 }

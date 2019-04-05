@@ -1,0 +1,33 @@
+{
+  "name": "npm-package-to-nix",
+  "version": "0.0.1",
+  "description": "Generate Nix expressions from npm packages",
+  "main": "TODO",
+  "bin": {
+    "npm-package-to-nix": "./cli.js",
+    "npm-package-to-nix--which-npm": "./which-npm.sh",
+    "npm-package-to-nix--npm": "./nix-npm.sh",
+    "nix-npm-install": "./nix-npm-install.sh"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "TODO"
+  },
+  "keywords": [
+    "TODO"
+  ],
+  "author": "TODO",
+  "license": "MIT",
+  "dependencies": {
+    "nijs": "0.0.25",
+    "pacote": "^9.5.0",
+    "yargs": "^13.2.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.4.3",
+    "@babel/core": "^7.4.3"
+  }
+}

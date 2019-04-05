@@ -23,7 +23,8 @@ in let
 
     npm = callPackage ./pkgs/development/nodejs/npm { };
     mkNodeEnvDerivation = npm.mkNodeEnv;
-    mkNpmPackageDerivation = npm.mkNpmPackageWithEnv;
+    mkNpmPackageDerivation = npm.mkNpmPackageWithRuntime;
+    npm-package-to-nix = callPackage ./pkgs/development/nodejs/npm-package-to-nix/package.nix { };
 
     buildRubyGem = callPackage ./pkgs/development/ruby/gem { };
     bundlerEnv = nixpkgs.bundlerEnv.override { inherit callPackage; };
