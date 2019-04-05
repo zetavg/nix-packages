@@ -32,7 +32,7 @@ let
     };
     inherit (overlayUtils) callOverlay mergeOverlays;
   in rec {
-    inherit lib callPackage;
+    inherit lib;
 
     npm = callPackage ./pkgs/development/nodejs/npm { };
     mkNodeEnvDerivation = npm.mkNodeEnv;
