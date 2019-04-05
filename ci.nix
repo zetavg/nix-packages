@@ -34,7 +34,7 @@ let
     in
       concatMap f (attrValues s);
 
-  outputsOf = p: map (o: p.${o}) p.outputs;
+  outputsOf = p: map (o: p.${o}) p.outputs or [ "out" ];
 
   nurAttrs = (import ./default.nix { inherit pkgs; }).usrpkgs;
 
