@@ -1,7 +1,8 @@
 { lib, ... }:
 
 let
-  inherit (builtins) attrValues filter mapAttrs match pathExists readDir;
+  inherit (builtins) attrValues filter match pathExists readDir;
+  inherit (lib) mapAttrs;
 in rec {
   listDir = dir: attrValues (mapAttrs (name: type: { inherit name type; }) (readDir dir));
   isDirContainingDefaultNixPath = path: pathExists (path + "/default.nix");
