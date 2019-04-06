@@ -136,5 +136,6 @@ in stdenv.mkDerivation rec {
     homepage    = https://www.phusionpassenger.com/;
     license     = licenses.mit;
     platforms   = platforms.all;
+    broken      = stdenv.isDarwin;
   };
 }
