@@ -5,6 +5,11 @@ let
   inherit (lib) splitString join mapAttrsToList;
   splitLines = splitString "\n";
   joinToLines = join "\n";
+  # TODO: Fix
+  #   lib.toYaml [ [ ] ]
+  #   => error: cannot coerce null to a string
+  #   lib.toYaml { n = { }; }
+  #   => error: cannot coerce null to a string
   toYaml = x: let
     type = typeOf x;
   in

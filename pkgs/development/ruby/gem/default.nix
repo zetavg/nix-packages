@@ -2,7 +2,6 @@
 # varients of the same gem just collocated with different dependencies
 
 {
-  nixpkgs,
   lib,
   fetchurl,
   fetchgit,
@@ -10,7 +9,8 @@
   git,
   darwin,
   ruby,
-  bundler
+  bundler,
+  buildRubyGem
 } @ defs:
 
 lib.makeOverridable (

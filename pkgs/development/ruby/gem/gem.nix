@@ -2,8 +2,8 @@
 # for building outputs having no information about it's dependencies
 
 {
-  nixpkgs,
   lib,
+  buildRubyGem,
   ...
 } @ defs:
 
@@ -19,7 +19,7 @@ lib.makeOverridable (
     dontInstallManpages ? false,
     ...
   } @ attrs:
-  (nixpkgs.buildRubyGem attrs).overrideAttrs (oldAttrs: let
+  (buildRubyGem attrs).overrideAttrs (oldAttrs: let
     inherit (oldAttrs) src;
     documentFlag =
       if document == []
