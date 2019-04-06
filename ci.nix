@@ -14,7 +14,6 @@
 with builtins;
 
 let
-
   isReserved = n: n == "lib" || n == "overlays" || n == "modules";
   isDerivation = p: isAttrs p && p ? type && p.type == "derivation";
   isBuildable = p: !(p.meta.broken or false) && p.meta.license.free or true;
@@ -36,7 +35,13 @@ let
 
   outputsOf = p: map (o: p.${o}) p.outputs or [ "out" ];
 
-  nurAttrs = (import ./default.nix { inherit pkgs; }).nixpkgs-diff;
+  allPkgs = if (builtins.getEnv "USE_AS_OVERLAY" == "")
+    then import ./default.nix { inherit pkgs; }
+    else import <nixpkgs> { # Ignores "pkgs", but probably no other way to do this
+      overlays = import ./manifest.nix;
+    };
+
+  nurAttrs = allPkgs.nixpkgs-diff;
 
   nurPkgs =
     flattenPkgs

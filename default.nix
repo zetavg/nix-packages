@@ -8,9 +8,9 @@
   ...
 }:
 let
-  inherit (builtins) foldl';
-in pkgs.appendOverlays [
-  (import ./extend-lib.nix)
-  (import ./all-packages.nix)
-  (import ./all-overlays.nix)
-]
+  inherit (builtins) hasAttr trace foldl';
+  overlays = import ./manifest.nix;
+in if hasAttr "appendOverlays" pkgs then
+  pkgs.appendOverlays overlays
+else
+  (import ./lib/manuallyAppendOverlaysToPkgs.nix { }) pkgs overlays
