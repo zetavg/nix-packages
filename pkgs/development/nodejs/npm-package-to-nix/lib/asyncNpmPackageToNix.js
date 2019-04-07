@@ -69,6 +69,12 @@ const asyncNpmPackageToNix = async (pkg, pkgLock) => {
     nixAttrs.devDependencies = pkgLockDepsToNix(devDependencies)
   }
 
+  if (typeof pkg.scripts === 'object') {
+    if (pkg.scripts.preinstall || pkg.scripts.install || pkg.scripts.postinstall) {
+      nixAttrs.buildNeeded = true
+    }
+  }
+
   return nijs.jsToNix(new nijs.NixFunction({
     argSpec: ['fetchurl', 'fetchgit'],
     body: nixAttrs,

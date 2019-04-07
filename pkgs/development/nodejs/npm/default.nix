@@ -257,7 +257,7 @@ in rec {
   } @ attrs: let
     packageName = getNameWithNodejsVersionFromAttrs attrs;
     name = "${packageName}+runtime";
-    package = mkNpmPackage (attrs // { buildNeeded = true; });
+    package = mkNpmPackage attrs;
     nodeEnvAttrs = {
       inherit nodejs dependencies devDependencies;
     };
