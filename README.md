@@ -4,7 +4,7 @@
 [![Cachix Cache](https://img.shields.io/badge/cachix-zetavg-blue.svg)](https://zetavg.cachix.org)
 
 Nix packages. Ruby, Rails, Node.js/NPM, Nginx + Passenger.
-
+<!--
 ## Installation
 
 To make this package collection accessible for your login user, add the following to `~/.config/nixpkgs/config.nix`:
@@ -78,3 +78,4 @@ For NixOS, add the following to your `/etc/nixos/configuration.nix`:
 ```
 
 </details>
+-->
