@@ -27,6 +27,8 @@ let
       builtins.fetchTarball "https://github.com/zetavg/rails-nix-sample/archive/master.tar.gz"
     ) { pkgs = self.pkgs; };
 
+    overlays-compat = callPackage ./pkgs/os-specific/nixos/overlays-compat.nix { };
+
     # Log the differentials we made to the nixpkgs-diff attr. Do aware that
     # changes made by subsequent overlays will not be reflected here, unless
     # they'll also add their changes to nixpkgs-diff.
