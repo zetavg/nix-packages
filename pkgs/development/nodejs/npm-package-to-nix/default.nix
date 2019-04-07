@@ -1,5 +1,7 @@
 {
-  pkgs,
+  pkgs ? import (
+    builtins.fetchTarball "https://git.io/zpkgs-archive-master"
+  ) { },
   fetchurl ? pkgs.fetchurl,
   fetchgit ? pkgs.fetchgit,
   nodejs ? pkgs.nodejs,

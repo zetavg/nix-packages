@@ -16,6 +16,10 @@ let
   packageNameFileName = ".package-name";
   notBuiltIndicationFileName = ".not-built";
 in rec {
+  /*
+   * Derivation to produce a npm package without doing anything, such as build
+   * it's native dependencies.
+   */
   mkNpmPackageWithoutBuild = {
     # Package Info
     name,
@@ -41,7 +45,7 @@ in rec {
       # Unpack and move the source to "$out/$packageName"
       # If is dir, use rsync to copy files
       if [ -d "$src" ]; then
-        # TODO: Support general npm exclude rules
+        # TODO: Support npm exclude rules in package.json
         rsync -a "$src/." "$out/$packageName/" \
           --exclude=/.*.swp \
           --exclude=/._* \
@@ -107,8 +111,17 @@ in rec {
       gnutar gzip bzip2.bin
     ];
     args = [ "-c" buildScript ];
-  } // { inherit packageName bins; nodejs = null; };
+  } // {
+    # Add additional attrs that might be useful
+    nodejs = null;
+    inherit packageName bins;
+    includedDependencies = [ ];
+    nodeEnv = null;
+  };
 
+  /*
+   * Derivation to produce a npm package.
+   */
   mkNpmPackage = {
     # Node.js
     nodejs,
@@ -163,9 +176,14 @@ in rec {
   } // {
     inherit nodejs;
     inherit (packageWithoutBuild) packageName bins;
+    includedDependencies = [ ];
+    nodeEnv = null;
   };
 
-  # Make derivation to build a npm package, with dependencies included
+  /*
+   * Derivation to produce a npm package with dependencies included under
+   * node_modules, equivalent of a package installed via npm install.
+   */
   mkNpmPackageWithDeps = {
     # Node.js
     nodejs,
@@ -221,15 +239,35 @@ in rec {
     buildInputs = [ coreutils rsync ];
     args = [ "-c" buildScript ];
   } // {
+    # Add additional attrs that might be useful
     inherit (package) nodejs packageName bins;
     inherit includedDependencies nodeEnv;
   };
 
-  mkNpmPackageWithRuntime = attrs: let
-    name = "${getNameWithNodejsVersionFromAttrs attrs}+runtime";
+  /*
+   * Derivation to produce a npm package and a nodeEnv which satisfies the
+   * production dependency of that npm package, and also binstubs for
+   * that package.
+   */
+  mkNpmPackageWithRuntime = {
+    nodejs,
+    dependencies,
+    devDependencies,
+    ...
+  } @ attrs: let
+    packageName = getNameWithNodejsVersionFromAttrs attrs;
+    name = "${packageName}+runtime";
     package = mkNpmPackage (attrs // { buildNeeded = true; });
-    nodeEnv = mkNodeEnv attrs;
-    nodeDevEnv = mkNodeEnv (attrs // { production = false; });
+    nodeEnvAttrs = {
+      inherit nodejs dependencies devDependencies;
+    };
+    nodeEnv = mkNodeEnv (nodeEnvAttrs // {
+      name = "${packageName}-node-env";
+    });
+    nodeDevEnv = mkNodeEnv (nodeEnvAttrs // {
+      name = "${packageName}-node-dev-env";
+      production = false;
+    });
     buildScript = prepareBuildScript + ''
       mkdir -p "$out"
       cd "$out"
@@ -262,6 +300,7 @@ in rec {
     buildInputs = [ bash coreutils ];
     args = [ "-c" buildScript ];
   } // {
+    # Add additional attrs that might be useful
     inherit package;
     inherit (package) nodejs packageName bins;
     inherit nodeEnv;
@@ -276,6 +315,10 @@ in rec {
     };
   };
 
+  /*
+   * Derivation to produce a node envirement which has PATH and NODE_PATH
+   * prepared.
+   */
   mkNodeEnv = {
     # Node.js
     nodejs,
@@ -295,7 +338,9 @@ in rec {
     includedDependencies = if production then dependencies else dependencies ++ devDependencies;
     mkPkgAdditionalAttrs = {
       inherit nodejs production dontbuild;
-      # TODO: Add devBuildEnv to support pacakgeing npm packages with nix
+      # TODO: Add devBuildEnv to support pacakgeing npm packages with nix, or
+      # say publishing npm packages that can be installd into other npm-nix
+      # projects with nix instead of npm?
       buildEnv = mkNodeEnv {
         inherit nodejs production dependencies devDependencies;
         dontbuild = true;
@@ -325,6 +370,7 @@ in rec {
     buildInputs = [ coreutils ];
     args = [ "-c" buildScript ];
   } // {
+    # Add additional attrs that might be useful
     inherit nodejs;
     inherit nodePath path;
     inherit dependencies devDependencies includedDependencies;
