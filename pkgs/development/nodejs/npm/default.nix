@@ -447,7 +447,7 @@ in rec {
     nodePath = join ":" deps;
     depsThatHaveBins = filter (d: (d.bins or []) != []) deps;
     path = join ":" ([ "${bash}/bin" "${nodejs}/bin" ] ++ (map (d: "${d}/.bin") depsThatHaveBins));
-    envVarsList = mapAttrsToList (n: v: "${n}=${toString v}") env;
+    envVarsList = map ({ n, v }: "${n}=${toString v}") (filter ({ v, ... }: v != null) (mapAttrsToList (n: v: { inherit n v; }) env));
     envVars = join "\n" envVarsList;
     envVarsExport = join "\n" (map (v: "export ${v}") envVarsList);
     buildScript = prepareBuildScript + ''
