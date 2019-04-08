@@ -16,7 +16,11 @@ let
     npm-package-to-nix = callPackage ./pkgs/development/nodejs/npm-package-to-nix/package.nix { };
 
     neofetch-web = callPackage (
-      "${fetchTarball "https://github.com/zetavg/neofetch-web/archive/master.tar.gz"}/package.nix"
+      builtins.fetchGit {
+        url = "https://github.com/zetavg/neofetch-web.git";
+        ref = "master";
+        rev = "94b8c54e6806868fdb1f1733191a4d285047c324";
+      } + /package.nix
     ) { pkgs = self.pkgs; };
 
     buildRubyGem = callPackage ./pkgs/development/ruby/gem {
