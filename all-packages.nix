@@ -7,12 +7,17 @@
 self: super:
 
 let
+  inherit (builtins) fetchTarball;
   inherit (self) callPackage;
   pkgs = with self; {
     npm = callPackage ./pkgs/development/nodejs/npm { };
     mkNodeEnvDerivation = npm.mkNodeEnv;
     mkNpmPackageDerivation = npm.mkNpmPackageWithRuntime;
     npm-package-to-nix = callPackage ./pkgs/development/nodejs/npm-package-to-nix/package.nix { };
+
+    neofetch-web = callPackage (
+      "${fetchTarball "https://github.com/zetavg/neofetch-web/archive/master.tar.gz"}/package.nix"
+    ) { pkgs = self.pkgs; };
 
     buildRubyGem = callPackage ./pkgs/development/ruby/gem {
       buildRubyGem = super.buildRubyGem;
@@ -24,7 +29,7 @@ let
     nginx-with-passenger = callPackage ./pkgs/servers/nginx-with-passenger.nix { };
 
     sample-rails-app = callPackage (
-      builtins.fetchTarball "https://github.com/zetavg/rails-nix-sample/archive/master.tar.gz"
+      fetchTarball "https://github.com/zetavg/rails-nix-sample/archive/master.tar.gz"
     ) { pkgs = self.pkgs; };
 
     overlays-compat = callPackage ./pkgs/os-specific/nixos/overlays-compat.nix { };
