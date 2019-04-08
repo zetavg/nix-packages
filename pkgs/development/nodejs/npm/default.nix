@@ -166,8 +166,8 @@ in rec {
 
       # Copy Files
       mkdir -p "$out/$packageName"
-      cp -r "$TMPDIR/build/.bin" "$out/"
-      cp -r "$TMPDIR/build/${packageNameFileName}" "$out/"
+      cp -rf "$TMPDIR/build/.bin" "$out/"
+      cp -rf "$TMPDIR/build/${packageNameFileName}" "$out/"
       # TODO: Support exclude rules in package.json
       rsync -a "$TMPDIR/build/$pathToPackage/." "$out/$pathToPackage/" \
         --exclude=/.*.swp \
