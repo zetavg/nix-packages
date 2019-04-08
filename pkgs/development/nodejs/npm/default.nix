@@ -1,4 +1,18 @@
-{ lib, system, fetchurl, fetchgit, stdenv, bash, coreutils, gnutar, gzip, bzip2, rsync, ... }:
+{
+  lib,
+  system,
+  fetchurl,
+  fetchgit,
+  stdenv,
+  bash,
+  coreutils,
+  gnutar,
+  gzip,
+  bzip2,
+  rsync,
+  npm-package-to-nix,
+  ...
+}:
 
 let
   inherit (builtins) map filter toString stringLength isAttrs attrNames;
@@ -345,13 +359,15 @@ in rec {
 
     env ? {},
     devEnv ? {},
+
+    runtimeInputs ? [],
     ...
   } @ attrs: let
     packageName = getNameWithNodejsVersionFromAttrs attrs;
     name = "${packageName}+runtime";
     package = mkNpmPackage attrs;
     nodeEnvAttrs = {
-      inherit nodejs dependencies devDependencies;
+      inherit nodejs dependencies devDependencies runtimeInputs;
     };
     nodeEnv = mkNodeEnv (nodeEnvAttrs // {
       name = "${packageName}-node-env";
@@ -428,6 +444,9 @@ in rec {
     # Dependencies
     dependencies ? [],
     devDependencies ? [],
+
+    # System Dependencies
+    runtimeInputs ? [],
     ...
   }: let
     includedDependencies = if production then dependencies else dependencies ++ devDependencies;
@@ -446,7 +465,11 @@ in rec {
 
     nodePath = join ":" deps;
     depsThatHaveBins = filter (d: (d.bins or []) != []) deps;
-    path = join ":" ([ "${bash}/bin" "${nodejs}/bin" ] ++ (map (d: "${d}/.bin") depsThatHaveBins));
+    path = join ":" (
+      [ "${bash}/bin" "${nodejs}/bin" ] ++
+      (map (d: "${d}/bin") runtimeInputs) ++
+      (map (d: "${d}/.bin") depsThatHaveBins)
+    );
     envVarsList = map ({ n, v }: "${n}=${toString v}") (filter ({ v, ... }: v != null) (mapAttrsToList (n: v: { inherit n v; }) env));
     envVars = join "\n" envVarsList;
     envVarsExport = join "\n" (map (v: "export ${v}") envVarsList);
