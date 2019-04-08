@@ -1,7 +1,7 @@
 { lib, system, fetchurl, fetchgit, stdenv, bash, coreutils, gnutar, gzip, bzip2, rsync, ... }:
 
 let
-  inherit (builtins) map filter stringLength isAttrs attrNames;
+  inherit (builtins) map filter toString stringLength isAttrs attrNames;
   inherit (lib) mapAttrsToList optionalString join;
   getNameFromAttrs = { name, version, ... }: "${name}-${version}";
   getNameWithNodePrefixFromAttrs = { name, version, ... }: "nodejs-${name}-${version}";
@@ -342,6 +342,9 @@ in rec {
     nodejs,
     dependencies,
     devDependencies,
+
+    env ? {},
+    devEnv ? {},
     ...
   } @ attrs: let
     packageName = getNameWithNodejsVersionFromAttrs attrs;
@@ -352,10 +355,12 @@ in rec {
     };
     nodeEnv = mkNodeEnv (nodeEnvAttrs // {
       name = "${packageName}-node-env";
+      env = env;
     });
     nodeDevEnv = mkNodeEnv (nodeEnvAttrs // {
       name = "${packageName}-node-dev-env";
       production = false;
+      env = devEnv;
     });
     buildScript = prepareBuildScript + ''
       mkdir -p "$out"
@@ -392,7 +397,7 @@ in rec {
     # Add additional attrs that might be useful
     inherit package;
     inherit (package) nodejs packageName bins;
-    inherit nodeEnv;
+    inherit nodeEnv nodeDevEnv env devEnv;
     inherit (nodeEnv) nodePath path;
     shell = stdenv.mkDerivation { # I don't know how to shellHook without
       name = "${name}-shell";     # stdenv.mkDerivation, so it's used here.
@@ -415,6 +420,7 @@ in rec {
     # Options
     production ? true,
     dontbuild ? false,
+    env ? {},
 
     # Env Info
     name,
@@ -441,27 +447,32 @@ in rec {
     nodePath = join ":" deps;
     depsThatHaveBins = filter (d: (d.bins or []) != []) deps;
     path = join ":" ([ "${bash}/bin" "${nodejs}/bin" ] ++ (map (d: "${d}/.bin") depsThatHaveBins));
+    envVarsList = mapAttrsToList (n: v: "${n}=${toString v}") env;
+    envVars = join "\n" envVarsList;
+    envVarsExport = join "\n" (map (v: "export ${v}") envVarsList);
     buildScript = prepareBuildScript + ''
       mkdir -p "$out"
 
       echo "$nodePath" > "$out/NODE_PATH"
       echo "$path" > "$out/PATH"
+      echo "$envVars" > "$out/ENV"
 
       echo "export PATH=$path\''${PATH:+:}\$PATH" >> "$out/env.sh"
       echo "export NODE_PATH=$nodePath" >> "$out/env.sh"
+      echo "$envVarsExport" >> "$out/env.sh"
     '' + optionalString dontbuild ''
       echo "true" > "$out/${notBuiltIndicationFileName}"
     '';
   in derivation {
     inherit system name;
-    inherit deps nodePath path;
+    inherit deps nodePath path envVars envVarsExport;
     builder = "${bash}/bin/bash";
     buildInputs = [ coreutils ];
     args = [ "-c" buildScript ];
   } // {
     # Add additional attrs that might be useful
     inherit nodejs;
-    inherit nodePath path;
+    inherit nodePath path env;
     inherit dependencies devDependencies includedDependencies;
     inherit production dontbuild;
   };
