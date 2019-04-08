@@ -1,3 +1,1 @@
-(import ./default.nix {
-  pkgs = import ../../../.. { };
-}).shell
+(import ./default.nix { }).shell
