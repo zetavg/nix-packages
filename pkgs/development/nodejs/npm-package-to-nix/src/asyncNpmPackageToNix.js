@@ -2,6 +2,20 @@ const nijs = require('nijs')
 const npmTools = require('./npmTools')
 const utils = require('./utils')
 
+const isBuildNeededForPkg = (pkg) => {
+  // TODO: because "scripts.install" defaults to "node-gyp rebuild" if there's a
+  // binding.gyp, packages that uses this default will not have "buildNeeded" set,
+  // and might not be build when it's expected to be. We'll probably need to check
+  // for that too.
+  if (typeof pkg.scripts === 'object') {
+    if (pkg.scripts.preinstall || pkg.scripts.install || pkg.scripts.postinstall) {
+      return true
+    }
+  }
+
+  return false
+}
+
 const pkgLockDepsToNix = deps => utils.mapObjToArr(deps, (name, data) => {
   const nixAttrs = {
     name: utils.normalizePackageName(name),
@@ -26,10 +40,8 @@ const pkgLockDepsToNix = deps => utils.mapObjToArr(deps, (name, data) => {
     // TODO: Handle other cases
   }
 
-  if (typeof data.scripts === 'object') {
-    if (data.scripts.preinstall || data.scripts.install || data.scripts.postinstall) {
-      nixAttrs.buildNeeded = true
-    }
+  if (isBuildNeededForPkg(data)) {
+    nixAttrs.buildNeeded = true
   }
 
   if (data.dependencies) {
@@ -58,6 +70,7 @@ const asyncNpmPackageToNix = async (pkg, pkgLock) => {
     packageName: pkg.name,
     version: pkg.version,
     src: new nijs.NixURL('./.'),
+    srcMaybeNotFromNpm: true,
     bin: npmTools.generalizeBinFieldInPackage(pkg.bin),
   }
 
@@ -69,10 +82,8 @@ const asyncNpmPackageToNix = async (pkg, pkgLock) => {
     nixAttrs.devDependencies = pkgLockDepsToNix(devDependencies)
   }
 
-  if (typeof pkg.scripts === 'object') {
-    if (pkg.scripts.preinstall || pkg.scripts.install || pkg.scripts.postinstall) {
-      nixAttrs.buildNeeded = true
-    }
+  if (isBuildNeededForPkg(pkg)) {
+    nixAttrs.buildNeeded = true
   }
 
   return nijs.jsToNix(new nijs.NixFunction({

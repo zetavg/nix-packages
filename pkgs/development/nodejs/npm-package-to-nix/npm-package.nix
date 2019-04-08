@@ -7,6 +7,7 @@
   packageName = "npm-package-to-nix";
   version = "0.0.1";
   src = ./.;
+  srcMaybeNotFromNpm = true;
   bin = {
     npm-package-to-nix = "./cli.js";
     npm-package-to-nix--which-npm = "./which-npm.sh";

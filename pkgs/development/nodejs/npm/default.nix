@@ -1,4 +1,4 @@
-{ lib, system, stdenv, bash, coreutils, gnutar, gzip, bzip2, rsync, ... }:
+{ lib, system, fetchurl, fetchgit, stdenv, bash, coreutils, gnutar, gzip, bzip2, rsync, ... }:
 
 let
   inherit (builtins) map filter stringLength isAttrs attrNames;
@@ -39,13 +39,9 @@ in rec {
       # Create output dir
       mkdir -p "$out/$packageName"
 
-      # Write data
-      echo "$packageName" > "$out/${packageNameFileName}"
-
       # Unpack and move the source to "$out/$packageName"
       # If is dir, use rsync to copy files
       if [ -d "$src" ]; then
-        # TODO: Support npm exclude rules in package.json
         rsync -a "$src/." "$out/$packageName/" \
           --exclude=/.*.swp \
           --exclude=/._* \
@@ -59,7 +55,8 @@ in rec {
           --exclude=/config.gypi \
           --exclude=/CVS \
           --exclude=/npm-debug.log \
-          --filter='dir-merge,- .npmignore'
+          --filter='dir-merge,- .npmignore' \
+          --filter='dir-merge,- .gitignore'
       # Not dir, assume it's a tarball
       else
         # Try to unpack
@@ -97,6 +94,14 @@ in rec {
         chmod +x "$binName"
         cd -
       done
+
+      # Write data
+      echo "$packageName" > "$out/${packageNameFileName}"
+      if [ -f "$out/$packageName/npm-package.nix" ]; then
+        cd "$out"
+        ln -sf "$packageName/npm-package.nix" .
+        cd -
+      fi
     '' + optionalString (buildNeeded == true) ''
       echo true > "$out/${notBuiltIndicationFileName}"
     '';
@@ -120,6 +125,84 @@ in rec {
   };
 
   /*
+   * If the source didn't come from npm, it might not be compiled. Here we
+   * handle that.
+   */
+  mkCustomNpmPackageWithoutBuild = {
+    # Node.js
+    nodejs,
+
+    # Package Info
+    name,
+    packageName,
+    version,
+    src,
+    bin ? null,
+    buildNeeded ? false,
+    ...
+  } @ attrs: let
+    packageSrc = mkNpmPackageWithoutBuild attrs;
+    tryImportPackageInfo = builtins.tryEval (import "${packageSrc}/npm-package.nix");
+    hasNpmPackageNix = tryImportPackageInfo.success;
+    npmPackageNix = tryImportPackageInfo.value { inherit fetchurl fetchgit; };
+    buildEnv = mkNodeEnv (npmPackageNix // {
+      inherit nodejs;
+      name = "tmp-env-for-building-${name}";
+      production = false;
+    });
+    buildScript = prepareBuildScript + ''
+      # Get Source
+      cp -r "${packageSrc}" "$TMPDIR/build"
+      chmod -R +w "$TMPDIR/build"
+      echo true > "$TMPDIR/build/.pbnix" # Make a mark
+
+      # Prepare Build Environment
+      source "${buildEnv}/env.sh"
+      export pathToPackage="$(cat "$TMPDIR/build/${packageNameFileName}")"
+
+      # Build
+      cd "$TMPDIR/build/$pathToPackage"
+      npm run build --if-present --no-update-notifier
+
+      # Copy Files
+      mkdir -p "$out/$packageName"
+      cp -r "$TMPDIR/build/.bin" "$out/"
+      cp -r "$TMPDIR/build/${packageNameFileName}" "$out/"
+      # TODO: Support exclude rules in package.json
+      rsync -a "$TMPDIR/build/$pathToPackage/." "$out/$pathToPackage/" \
+        --exclude=/.*.swp \
+        --exclude=/._* \
+        --exclude=/.DS_Store \
+        --exclude=/.git \
+        --exclude=/.hg \
+        --exclude=/.npmrc \
+        --exclude=/.lock-wscript \
+        --exclude=/.svn \
+        --exclude=/.wafpickle-* \
+        --exclude=/config.gypi \
+        --exclude=/CVS \
+        --exclude=/npm-debug.log \
+        --filter='dir-merge,- .npmignore'
+    '';
+  in if (!hasNpmPackageNix) then packageSrc else derivation {
+    name = packageSrc.name;
+    inherit system;
+    builder = "${bash}/bin/bash";
+    buildInputs = [
+      bash
+      coreutils
+      rsync
+    ];
+    args = [ "-c" buildScript ];
+  } // {
+    # Add additional attrs that might be useful
+    inherit nodejs;
+    inherit (packageSrc) packageName bins;
+    includedDependencies = [ ];
+    nodeEnv = null;
+  };
+
+  /*
    * Derivation to produce a npm package.
    */
   mkNpmPackage = {
@@ -134,12 +217,15 @@ in rec {
     bin ? null,
     buildNeeded ? false,
 
+    srcMaybeNotFromNpm ? false,
+
     # Environment Required For Building
     buildEnv ? null,
     ...
   } @ attrs: let
     name = getNameWithNodejsVersionFromAttrs attrs;
-    packageWithoutBuild = mkNpmPackageWithoutBuild attrs;
+    mkPkgWithoutBuild = if srcMaybeNotFromNpm then mkCustomNpmPackageWithoutBuild else mkNpmPackageWithoutBuild;
+    packageWithoutBuild = mkPkgWithoutBuild attrs;
     buildScript = prepareBuildScript + ''
       # Get Source
       cp -r "$packageWithoutBuild" "$TMPDIR/build"
@@ -153,8 +239,10 @@ in rec {
 
       # Build
       cd "$TMPDIR/build/$pathToPackage"
-      npm run nix-preinstall --if-present --no-update-notifier
+      # TODO: Do we need to run "prepare" here? Where?
+      # npm run prepare --if-present --no-update-notifier
       npm run preinstall --if-present --no-update-notifier
+      # this is not "npm install"
       npm run install --if-present --no-update-notifier
       npm run postinstall --if-present --no-update-notifier
       npm run nix-postinstall --if-present --no-update-notifier
@@ -200,12 +288,15 @@ in rec {
     bin ? null,
     buildNeeded ? false,
 
+    srcMaybeNotFromNpm ? false,
+
     # Dependencies
     dependencies ? [],
     devDependencies ? [],
     ...
   } @ attrs: let
-    mkPkg = if dontbuild then mkNpmPackageWithoutBuild else mkNpmPackage;
+    mkPkgWithoutBuild = if srcMaybeNotFromNpm then mkCustomNpmPackageWithoutBuild else mkNpmPackageWithoutBuild;
+    mkPkg = if dontbuild then mkPkgWithoutBuild else mkNpmPackage;
     package = mkPkg attrs;
     includedDependencies = if production then dependencies else dependencies ++ devDependencies;
     dependencyNames = map getNameFromAttrs includedDependencies;
@@ -305,8 +396,8 @@ in rec {
     inherit (package) nodejs packageName bins;
     inherit nodeEnv;
     inherit (nodeEnv) nodePath path;
-    shell = stdenv.mkDerivation {
-      name = "${name}-shell";
+    shell = stdenv.mkDerivation { # I don't know how to shellHook without
+      name = "${name}-shell";     # stdenv.mkDerivation, so it's used here.
       phases = [ ];
       inherit nodeDevEnv;
       shellHook = ''
