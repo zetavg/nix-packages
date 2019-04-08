@@ -1,4 +1,6 @@
-# Force some fields to be required from callPackage
+/*
+ * Force some attrs to be required from callPackage.
+ */
 {
   pkgs,
   mkNpmPackageDerivation,
