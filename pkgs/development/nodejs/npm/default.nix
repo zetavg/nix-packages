@@ -91,7 +91,7 @@ in rec {
         mkdir -p "$out/.bin"
         cd "$out/.bin"
         ln -sf "../$packageName/$binPath" "$binName"
-        chmod +x "$binName"
+        # chmod +x "$binName" # Might not be build now and will chmod: cannot operate on dangling symlink
         cd -
       done
 
@@ -166,7 +166,7 @@ in rec {
 
       # Copy Files
       mkdir -p "$out/$packageName"
-      cp -rf "$TMPDIR/build/.bin" "$out/"
+      [ -d "$TMPDIR/build/.bin" ] && cp -rf "$TMPDIR/build/.bin" "$out/"
       cp -rf "$TMPDIR/build/${packageNameFileName}" "$out/"
       # TODO: Support exclude rules in package.json
       rsync -a "$TMPDIR/build/$pathToPackage/." "$out/$pathToPackage/" \
@@ -310,17 +310,15 @@ in rec {
       inherit nodejs dependencies devDependencies production dontbuild;
     };
     buildScript = prepareBuildScript + ''
-      mkdir -p "$out"
+      cp -rf "$package" "$out"
       cd "$out"
-
-      cp -rf "$package/"* .
-
+      chmod +w .
       mkdir node_modules
       cd node_modules
-      rm -rf ${packageNameFileName}
       IFS=':' read -r -a nodePath <<< "$(cat "$nodeEnv/NODE_PATH")"
       for pkg in $nodePath; do
-        rsync -a "$pkg/." ./
+        rsync -a "$pkg/." ./ \
+          --exclude=/${packageNameFileName}
       done
     '';
   in if (includedDependencies == []) then package else derivation {
