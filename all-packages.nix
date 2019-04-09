@@ -19,7 +19,7 @@ let
       builtins.fetchGit {
         url = "https://github.com/zetavg/neofetch-web.git";
         ref = "master";
-        rev = "94b8c54e6806868fdb1f1733191a4d285047c324";
+        rev = "c6f3eee3fd8d7a688081e6b13c5c087a5ec66499";
       } + /package.nix
     ) { pkgs = self.pkgs; };
 
