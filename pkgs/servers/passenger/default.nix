@@ -74,68 +74,71 @@ let
     download_cache_dir=/tmp/passenger_download_cache_dir
     build_system_dir=${root}
   '';
-in stdenv.mkDerivation rec {
-  name = "passenger-${version}";
-  src = fetchurl {
-    url = srcUrl;
-    sha256 = sha256s.${srcUrl};
-  };
-  buildInputs = [
-    ruby
-    bundler
-    rake
-    curl
-    gcc
-    openssl
-    zlib
-    pcre
-  ];
-  PASSENGER_AGENT_OPTIMIZE = if optimizations then "true" else "false";
-  PREFETCHED_FILES_JSON = prefetchedFilesJson;
-  patches = [
-    ./simulate-process-euid-zero.patch
-    ./enable-optimizations.patch
-    ./use-prefetched-files-for-downloads.patch
-  ];
-  commandStringsInSourceCodePatch = import ./commandStringsInSourceCodePatch.nix {
-    inherit coreutils findutils bash lsof procps beep;
-  };
-  binLoadPathPatch = import ./binLoadPathPatch.nix { };
-  postPatch = ''
-    echo "$commandStringsInSourceCodePatch" | patch -p0
-    echo "$binLoadPathPatch" | sed "s|\$out|\"$out\"|g" | patch -p0
-    patchShebangs .
-  '';
-  configurePhase = ''
-    echo "${generateLocationsIni "$TMPDIR/$sourceRoot"}" > src/ruby_supportlib/phusion_passenger/locations.ini
-  '';
-  buildPhase = ''
-    echo 'Building native support...'
-    bin/passenger-config build-native-support
-    echo 'Building Passenger agent...'
-    bin/passenger-config install-agent
-  '' + lib.optionalString buildStandalone ''
-    echo 'Building Passenger standalone runtime...'
-    bin/passenger-config install-standalone-runtime
-  '' + lib.optionalString buildNginxSupportFiles ''
-    echo 'Building Nginx support files...'
-    rake nginx
-  '' + lib.optionalString buildApache2Module ''
-    echo 'Building Apache 2 module...'
-    rake apache2
-  '';
-  installPhase = ''
-    cp -r . $out
-  '';
-  preFixup = ''
-    echo "${generateLocationsIni "$out"}" > "$out/src/ruby_supportlib/phusion_passenger/locations.ini"
-  '';
+  drv = stdenv.mkDerivation rec {
+    name = "passenger-${version}";
+    src = fetchurl {
+      url = srcUrl;
+      sha256 = sha256s.${srcUrl};
+    };
+    buildInputs = [
+      ruby
+      bundler
+      rake
+      curl
+      gcc
+      openssl
+      zlib
+      pcre
+    ];
+    PASSENGER_AGENT_OPTIMIZE = if optimizations then "true" else "false";
+    PREFETCHED_FILES_JSON = prefetchedFilesJson;
+    patches = [
+      ./simulate-process-euid-zero.patch
+      ./enable-optimizations.patch
+      ./use-prefetched-files-for-downloads.patch
+    ];
+    commandStringsInSourceCodePatch = import ./commandStringsInSourceCodePatch.nix {
+      inherit coreutils findutils bash lsof procps beep;
+    };
+    binLoadPathPatch = import ./binLoadPathPatch.nix { };
+    postPatch = ''
+      echo "$commandStringsInSourceCodePatch" | patch -p0
+      echo "$binLoadPathPatch" | sed "s|\$out|\"$out\"|g" | patch -p0
+      patchShebangs .
+    '';
+    configurePhase = ''
+      echo "${generateLocationsIni "$TMPDIR/$sourceRoot"}" > src/ruby_supportlib/phusion_passenger/locations.ini
+    '';
+    buildPhase = ''
+      echo 'Building native support...'
+      bin/passenger-config build-native-support
+      echo 'Building Passenger agent...'
+      bin/passenger-config install-agent
+    '' + lib.optionalString buildStandalone ''
+      echo 'Building Passenger standalone runtime...'
+      bin/passenger-config install-standalone-runtime
+    '' + lib.optionalString buildNginxSupportFiles ''
+      echo 'Building Nginx support files...'
+      rake nginx
+    '' + lib.optionalString buildApache2Module ''
+      echo 'Building Apache 2 module...'
+      rake apache2
+    '';
+    installPhase = ''
+      cp -r . $out
+    '';
+    preFixup = ''
+      echo "${generateLocationsIni "$out"}" > "$out/src/ruby_supportlib/phusion_passenger/locations.ini"
+    '';
 
-  meta = with lib; {
-    description = "A fast and robust web application server for Ruby, Python and Node.js that runs and automanages your apps with ease";
-    homepage    = https://www.phusionpassenger.com/;
-    license     = licenses.mit;
-    platforms   = platforms.all;
-    broken      = stdenv.isDarwin;
+    meta = with lib; {
+      description = "A fast and robust web application server for Ruby, Python and Node.js that runs and automanages your apps with ease";
+      homepage    = https://www.phusionpassenger.com/;
+      license     = licenses.mit;
+      platforms   = platforms.all;
+      broken      = stdenv.isDarwin;
+    };
   };
+in drv // {
+  nodejs_supportlib = "${drv.outPath}/src/nodejs_supportlib";
 }
