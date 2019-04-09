@@ -74,6 +74,12 @@ const asyncNpmPackageToNix = async (pkg, pkgLock) => {
     bin: npmTools.generalizeBinFieldInPackage(pkg.bin),
   }
 
+  if (pkg.scripts && pkg.scripts.start) {
+    nixAttrs.startScript = pkg.scripts.start
+    const [,, startupFile] = nixAttrs.startScript.match(/node ['"]?(\.\/)?([.+a-zA-Z0-9\/\\]+)['"]?/)
+    if (startupFile) nixAttrs.startupFile = startupFile
+  }
+
   if (pkgLock.dependencies) {
     const deps = await npmTools.asyncPopulateDataForDependencies(pkgLock.dependencies)
     const { dependencies, devDependencies } = classifyDeps(deps)
