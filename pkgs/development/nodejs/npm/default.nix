@@ -30,6 +30,8 @@ let
   packageNameFileName = ".package-name";
   notBuiltIndicationFileName = ".not-built";
 in rec {
+  # TODO: Make sure the same package should have the same hash and outPath all the time.
+
   /*
    * Derivation to produce a npm package without doing anything, such as build
    * it's native dependencies.
@@ -357,6 +359,9 @@ in rec {
     dependencies,
     devDependencies,
 
+    startScript ? null, # TODO: Generate a package-name-start bin if this presents
+    startupFile ? null,
+
     env ? {},
     devEnv ? {},
 
@@ -403,18 +408,23 @@ in rec {
       fi
       cd -
     '';
-  in derivation {
-    inherit system name;
-    inherit package;
-    builder = "${bash}/bin/bash";
-    buildInputs = [ bash coreutils ];
-    args = [ "-c" buildScript ];
-  } // {
+    drv = derivation {
+      inherit system name;
+      inherit package;
+      builder = "${bash}/bin/bash";
+      buildInputs = [ bash coreutils ];
+      args = [ "-c" buildScript ];
+    };
+    startupFile_relative = if startupFile != null then "${packageName}/${startupFile}" else null;
+    startupFile = if startupFile_relative != null then "${drv.outPath}/${startupFile_relative}" else null;
+  in drv // {
     # Add additional attrs that might be useful
     inherit package;
     inherit (package) nodejs packageName bins;
     inherit nodeEnv nodeDevEnv env devEnv;
     inherit (nodeEnv) nodePath path;
+    inherit startupFile_relative startupFile;
+    # TODO: Rename this to devShell, while there'll be a shell for production environment
     shell = stdenv.mkDerivation { # I don't know how to shellHook without
       name = "${name}-shell";     # stdenv.mkDerivation, so it's used here.
       phases = [ ];
