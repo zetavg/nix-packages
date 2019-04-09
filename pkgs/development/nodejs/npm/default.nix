@@ -463,7 +463,7 @@ in rec {
     };
     deps = map (attrs: mkNpmPackageWithDeps (attrs // mkPkgAdditionalAttrs)) includedDependencies;
 
-    nodePath = join ":" deps;
+    nodePathExpanded = join ":" deps;
     depsThatHaveBins = filter (d: (d.bins or []) != []) deps;
     path = join ":" (
       [ "${bash}/bin" "${nodejs}/bin" ] ++
@@ -476,26 +476,37 @@ in rec {
     buildScript = prepareBuildScript + ''
       mkdir -p "$out"
 
-      echo "$nodePath" > "$out/NODE_PATH"
+      mkdir -p "$out/modules"
+      for d in $deps; do
+        packageName="$(cat "$d/${packageNameFileName}")"
+        source="$d/$packageName"
+        target="$out/modules/$packageName"
+        mkdir -p "$(dirname "$target")"
+        ln -s "$source" "$target"
+      done
+
       echo "$path" > "$out/PATH"
+      echo "$nodePathExpanded" > "$out/NODE_PATH"
       echo "$envVars" > "$out/ENV"
 
       echo "export PATH=$path\''${PATH:+:}\$PATH" >> "$out/env.sh"
-      echo "export NODE_PATH=$nodePath" >> "$out/env.sh"
+      echo "export NODE_PATH='$out/modules'" >> "$out/env.sh"
       echo "$envVarsExport" >> "$out/env.sh"
     '' + optionalString dontbuild ''
       echo "true" > "$out/${notBuiltIndicationFileName}"
     '';
-  in derivation {
-    inherit system name;
-    inherit deps nodePath path envVars envVarsExport;
-    builder = "${bash}/bin/bash";
-    buildInputs = [ coreutils ];
-    args = [ "-c" buildScript ];
-  } // {
+    drv = derivation {
+      inherit system name;
+      inherit deps path nodePathExpanded envVars envVarsExport;
+      builder = "${bash}/bin/bash";
+      buildInputs = [ coreutils ];
+      args = [ "-c" buildScript ];
+    };
+  in drv // {
     # Add additional attrs that might be useful
     inherit nodejs;
-    inherit nodePath path env;
+    inherit path env;
+    nodePath = "${drv.outPath}/modules";
     inherit dependencies devDependencies includedDependencies;
     inherit production dontbuild;
   };
