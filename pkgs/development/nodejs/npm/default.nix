@@ -356,6 +356,7 @@ in rec {
    */
   mkNpmPackageWithRuntime = {
     nodejs,
+    packageName,
     dependencies,
     devDependencies,
 
@@ -368,18 +369,18 @@ in rec {
     runtimeInputs ? [],
     ...
   } @ attrs: let
-    packageName = getNameWithNodejsVersionFromAttrs attrs;
-    name = "${packageName}+runtime";
+    pkgName = getNameWithNodejsVersionFromAttrs attrs;
+    name = "${pkgName}+runtime";
     package = mkNpmPackage attrs;
     nodeEnvAttrs = {
       inherit nodejs dependencies devDependencies runtimeInputs;
     };
     nodeEnv = mkNodeEnv (nodeEnvAttrs // {
-      name = "${packageName}-node-env";
+      name = "${pkgName}-node-env";
       env = env;
     });
     nodeDevEnv = mkNodeEnv (nodeEnvAttrs // {
-      name = "${packageName}-node-dev-env";
+      name = "${pkgName}-node-dev-env";
       production = false;
       env = devEnv;
     });
@@ -416,14 +417,15 @@ in rec {
       args = [ "-c" buildScript ];
     };
     startupFile_relative = if startupFile != null then "${packageName}/${startupFile}" else null;
-    startupFile = if startupFile_relative != null then "${drv.outPath}/${startupFile_relative}" else null;
+    startupFile_absolute = if startupFile_relative != null then "${drv.outPath}/${startupFile_relative}" else null;
   in drv // {
     # Add additional attrs that might be useful
     inherit package;
     inherit (package) nodejs packageName bins;
     inherit nodeEnv nodeDevEnv env devEnv;
     inherit (nodeEnv) nodePath path;
-    inherit startupFile_relative startupFile;
+    inherit startupFile_relative startupFile_absolute;
+    startupFile = startupFile_absolute;
     # TODO: Rename this to devShell, while there'll be a shell for production environment
     shell = stdenv.mkDerivation { # I don't know how to shellHook without
       name = "${name}-shell";     # stdenv.mkDerivation, so it's used here.
