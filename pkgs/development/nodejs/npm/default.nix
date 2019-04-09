@@ -466,7 +466,7 @@ in rec {
     nodePathExpanded = join ":" deps;
     depsThatHaveBins = filter (d: (d.bins or []) != []) deps;
     path = join ":" (
-      [ "${bash}/bin" "${nodejs}/bin" ] ++
+      [ "${bash}/bin" "${coreutils}/bin" "${nodejs}/bin" ] ++
       (map (d: "${d}/bin") runtimeInputs) ++
       (map (d: "${d}/.bin") depsThatHaveBins)
     );
