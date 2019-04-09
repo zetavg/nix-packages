@@ -89,7 +89,7 @@ const asyncNpmPackageToNix = async (pkg, pkgLock) => {
   return nijs.jsToNix(new nijs.NixFunction({
     argSpec: ['fetchurl', 'fetchgit'],
     body: nixAttrs,
-  }), true)
+  }), true) + '\n'
 }
 
 module.exports = asyncNpmPackageToNix
