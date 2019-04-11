@@ -11,6 +11,7 @@ let
   inherit (self) callPackage;
   pkgs = with self; {
     npm = callPackage ./pkgs/development/nodejs/npm { };
+    fetchNpmPackage = callPackage ./pkgs/development/nodejs/npm/fetchNpmPackage { };
     mkNodeEnvDerivation = npm.mkNodeEnv;
     mkNpmPackageDerivation = npm.mkNpmPackageWithRuntime;
     npm-package-to-nix = callPackage ./pkgs/development/nodejs/npm-package-to-nix/package.nix { };
