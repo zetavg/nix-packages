@@ -3,6 +3,7 @@
  */
 {
   pkgs,
+  mkNodePackageWithRuntime,
   ...
 } @ attrs:
 
