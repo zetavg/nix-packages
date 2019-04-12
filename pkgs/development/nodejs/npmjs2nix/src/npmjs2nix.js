@@ -1,5 +1,7 @@
 import nijs from 'nijs'
 import path from 'path'
+import shell from 'shelljs'
+import crypto from 'crypto'
 import {
   PackageMetadataStore,
   getVersionType,
@@ -128,24 +130,71 @@ export const asyncPackageLockDependenciesToNixDependenciesAndDevDependencies = a
         const metadata = (
           await packageMetadataStore.asyncGet(name, lockEntry.version)
         )
-        const dependencydata = (
+        const privateDependencydata = (
           await asyncPackageLockDependenciesToNixDependenciesAndDevDependencies(
             lockEntry.dependencies,
             packageMetadataStore,
           )
         )
-        return [lockEntry, metadata, dependencydata]
+
+        const nixMetadata = {
+          ...packageMetadataToNix(metadata),
+          ...getSourceFromPackageLockDependencyEntry(lockEntry),
+        }
+        // We need to get the full dependencies and devDependencies for packages
+        // that might need to "build" or "install"
+        if (
+          // not from a tarball and has prepare hooks, need to "build"
+          (!nixMetadata.tarball && nixMetadata.hasPrepareHooks)
+        ) {
+          const miniumalizedMetadata = {
+            name: metadata.name,
+            description: '...',
+            repository: '...',
+            license: '...',
+            dependencies: metadata.dependencies,
+            devDependencies: metadata.devDependencies,
+          }
+          cleanObjectInplace(miniumalizedMetadata)
+          if (miniumalizedMetadata.dependencies || miniumalizedMetadata.devDependencies) {
+            const { dependencies, devDependencies } = await asyncNpmPackageToNix(miniumalizedMetadata)
+            const dependencydata = { dependencies, devDependencies }
+            return [lockEntry, nixMetadata, privateDependencydata, dependencydata]
+          }
+        }
+        if (
+          // has installation hooks, need to "install"
+          nixMetadata.hasInstallationHooks
+        ) {
+          const miniumalizedMetadata = {
+            name: metadata.name,
+            description: '...',
+            repository: '...',
+            license: '...',
+            dependencies: metadata.dependencies,
+          }
+          cleanObjectInplace(miniumalizedMetadata)
+          if (miniumalizedMetadata.dependencies) {
+            const { dependencies, devDependencies } = await asyncNpmPackageToNix(miniumalizedMetadata)
+            const dependencydata = { dependencies, devDependencies }
+            return [lockEntry, nixMetadata, privateDependencydata, dependencydata]
+          }
+        }
+
+        return [lockEntry, nixMetadata, privateDependencydata, {}]
       }),
   )
 
   const dependenciesAndDevDependencies = arrayOfLockEntryMetadataAndDependencydata
-    .map(([lockEntry, metadata, { dependencies, devDependencies }]) => {
+    .map(([lockEntry, nixMetadata, privateDependencydata, dependencydata]) => {
       const nixAttrs = {
-        ...packageMetadataToNix(metadata),
-        ...getSourceFromPackageLockDependencyEntry(lockEntry),
-        dependencies,
-        devDependencies,
+        ...nixMetadata,
+        privateDependencies: privateDependencydata.dependencies,
+        privateDevDependencies: privateDependencydata.devDependencies,
+        dependencies: dependencydata.dependencies,
+        devDependencies: dependencydata.devDependencies,
       }
+
       cleanObjectInplace(nixAttrs)
       return [lockEntry.dev, nixAttrs.name, nixAttrs]
     })
@@ -165,7 +214,22 @@ export const asyncPackageLockDependenciesToNixDependenciesAndDevDependencies = a
   return dependenciesAndDevDependencies
 }
 
-export const asyncNpmPackageToNix = async (pkg, pkgLock) => {
+export const asyncNpmPackageToNix = async (pkg, pkgLock, tmpDir = shell.tempdir(), { silent = false } = {}) => {
+  if (!pkgLock) {
+    if (!silent) console.error(`Getting package-lock for ${pkg.name}...`)
+    const tmpD = `${tmpDir}/npmjs2nix-${crypto.randomBytes(20).toString('hex')}`
+    const pwd = shell.pwd()
+    if (!silent) console.error(`Temporary dir is: ${tmpD}`)
+    shell.mkdir('-p', tmpD)
+    shell.echo(JSON.stringify(pkg)).to(`${tmpD}/package.json`)
+    shell.cd(tmpD)
+    shell.exec('npm install --package-lock-only')
+    if (!silent) console.error(`npm install for ${pkg.name} done`)
+    pkgLock = require(`${tmpD}/package-lock.json`)
+    if (!silent) console.error(`got package-lock for ${pkg.name}`)
+    shell.cd(pwd)
+  }
+
   const packageMetadataStore = new PackageMetadataStore(
     getFlattenedDependencyNameAndVersionsFrom(pkgLock),
   )
@@ -195,8 +259,8 @@ export const asyncNpmPackageToNix = async (pkg, pkgLock) => {
   return nixAttrs
 }
 
-export const npmjs2nix = async (pkg, pkgLock) => {
-  const nixAttrs = await asyncNpmPackageToNix(pkg, pkgLock)
+export const npmjs2nix = async (pkg, pkgLock, tmpDir = shell.tempdir()) => {
+  const nixAttrs = await asyncNpmPackageToNix(pkg, pkgLock, tmpDir)
 
   return nijs.jsToNix(new nijs.NixFunction({
     argSpec: [' src ? null', 'srcs ? null '],
