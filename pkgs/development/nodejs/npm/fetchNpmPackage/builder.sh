@@ -12,4 +12,4 @@ for i in npm-unpacked/*; do
 done
 
 # Patch shebangs (/usr/bin/env)
-find $out/ -type f | xargs sed -i "s|/usr/bin/env|$env|g"
+find $out/ -type f -print0 | xargs -0 sed -i "s|/usr/bin/env|$env|g"
