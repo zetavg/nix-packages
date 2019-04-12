@@ -1,14 +1,16 @@
 { lib, stdenv, system, mkNodeEnv, mkNodePackage }:
 
+nodejs:
 {
-  nodejs,
+  production ? true,
+  environmentVariables ? {},
+  buildInputs ? [],
+}:
+{
   name,
   dependencyIgnoreRules ? {},
   dependencies ? {},
   devDependencies ? {},
-  production ? true,
-  environmentVariables ? {},
-  buildInputs ? [],
   ...
 }:
 
@@ -47,7 +49,7 @@ let
   );
   nodeModules = mapAttrs (
     n: v:
-    mkNodePackage (v // { inherit nodejs; })
+    mkNodePackage nodejs v
   ) dependenciesToInstall;
 in mkNodeEnv {
   name = envName;

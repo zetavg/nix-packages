@@ -18,7 +18,7 @@ let
     map (
       pkg: mapAttrsToList (
         name: path: "${name}|${toPath "${pkg}/${path}"}"
-      ) pkg.bin
+      ) (pkg.bin or {})
     ) nodeModulesList
   );
   systemPaths = concatStringsSep ":" (

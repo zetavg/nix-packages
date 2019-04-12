@@ -25,8 +25,10 @@ in
 , version ? ""
   # The tarball attrset that contains a url and a hash
 , tarball ? null
+  # Executables that this package provided
+, bin ? {}
 , ...
-}:
+} @ attrs:
 
 let
   source =
@@ -35,8 +37,8 @@ let
   derivationName =
     if name != "" && version != "" then "npm-${name}-${version}"
     else throw "fetchNpmPackage requires `name` and `version` to be set";
-  passthru = {
-    inherit name packageName version;
+  passthru = attrs // {
+    nameWithoutVersion = name;
   };
 in
 
