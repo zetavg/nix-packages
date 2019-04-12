@@ -7,7 +7,7 @@
     "npmjs2nix": "./lib/cli.js"
   },
   "files": [
-    "./lib/**/*"
+    "/lib/**/*"
   ],
   "scripts": {
     "prepare": "npm run build",

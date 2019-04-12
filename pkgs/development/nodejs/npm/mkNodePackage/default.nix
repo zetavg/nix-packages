@@ -1,6 +1,7 @@
 {
   lib,
   fetchNpmPackage,
+  buildNpmPackage,
   mkNpmPackageBundle,
   mkInstalledNpmPackage,
   mkNodePackage
@@ -21,7 +22,7 @@ nodejs:
   # Different ways to specify the source
   tarball ? null, # Tarballs that are packaged by npm
   src ? null,
-  srcs ? null,
+  srcs ? [ ],
 
   # Conditions that might change how we build the package
   hasInstallationHooks ? false,
@@ -39,8 +40,9 @@ let
   # Get the package
   package =
     if tarball != null then fetchNpmPackage attrs
-    # TODO: Add more cases
-    else throw "Don't know how to build node package ${attrs.name}, attrs are ${toJSON attrs}";
+    else if src != null || srcs != [ ] then buildNpmPackage { inherit nodejs; format = "directory"; } attrs
+    # TODO: Add support for git sources
+    else throw "mkNodePackage: don't know how to build node package ${attrs.name or "undefined-name"}, attrs are ${toJSON attrs}";
   package' = if !hasInstallationHooks then package else mkInstalledNpmPackage {
     inherit nodejs package;
   };

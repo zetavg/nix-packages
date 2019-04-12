@@ -10,8 +10,17 @@ let
   inherit (builtins) fetchTarball;
   inherit (self) callPackage;
   pkgs = with self; {
-    npm = callPackage ./pkgs/development/nodejs/npm { };
     fetchNpmPackage = callPackage ./pkgs/development/nodejs/npm/fetchNpmPackage { };
+    buildNpmPackage = callPackage ./pkgs/development/nodejs/npm/buildNpmPackage { };
+    mkInstalledNpmPackage = callPackage ./pkgs/development/nodejs/npm/mkInstalledNpmPackage { };
+    mkNpmPackageBundle = callPackage ./pkgs/development/nodejs/npm/mkNpmPackageBundle { };
+    mkNodePackage = callPackage ./pkgs/development/nodejs/npm/mkNodePackage { };
+    mkNodeEnv = callPackage ./pkgs/development/nodejs/npm/mkNodeEnv { };
+    mkNodeEnvForPackage = callPackage ./pkgs/development/nodejs/npm/mkNodeEnvForPackage { };
+    mkNodePackageWithRuntime = callPackage ./pkgs/development/nodejs/npm/mkNodePackageWithRuntime { };
+    npmjs2nix = callPackage ./pkgs/development/nodejs/npmjs2nix/package.nix { };
+
+    npm = callPackage ./pkgs/development/nodejs/npm { };
     mkNodeEnvDerivation = npm.mkNodeEnv;
     mkNpmPackageDerivation = npm.mkNpmPackageWithRuntime;
     npm-package-to-nix = callPackage ./pkgs/development/nodejs/npm-package-to-nix/package.nix { };
