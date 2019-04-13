@@ -21,7 +21,6 @@ stdenvNoCC.mkDerivation {
   inherit name package;
   builder = ./builder.sh;
   buildInputs = [ nodejs ];
-  # TODO: Do we need this? Dependencies that are required during installation seems to be prebundled.
-  # setupNodeEnvScript = nodeEnv.setupScript;
+  setupNodeEnvScript = nodeEnv.setupScript;
   inherit passthru;
 }
