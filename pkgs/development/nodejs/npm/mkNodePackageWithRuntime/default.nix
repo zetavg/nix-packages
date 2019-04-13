@@ -34,11 +34,12 @@ let
       publicRoot = if (pr != "") then "${drv.outPath}/${pn}/${pr}" else null;
       devShell = stdenvNoCC.mkDerivation {
         name = "${name}-dev-shell";
-        phases = [ ];
+        phases = [ "nobuildPhase" ];
         setupScript = devEnv.setupScript;
         shellHook = ''
           source $setupScript
         '';
+        nobuildPhase = "echo 'This derivation is not meant to be built. Producing an empty result.'; touch $out";
       };
       getNginxPassengerConfig = { passenger }:
         assert (
