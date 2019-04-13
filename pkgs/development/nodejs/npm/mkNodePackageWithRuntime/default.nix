@@ -30,8 +30,8 @@ let
       sf = package.startupFile or "";
       pr = package.publicRoot or "";
     in rec {
-      startupFile = if (sf != "") then "${pn}/${sf}" else null;
-      publicRoot = if (pr != "") then "${pn}/${pr}" else null;
+      startupFile = if (sf != "") then "${drv.outPath}/${pn}/${sf}" else null;
+      publicRoot = if (pr != "") then "${drv.outPath}/${pn}/${pr}" else null;
       devShell = stdenvNoCC.mkDerivation {
         name = "${name}-dev-shell";
         phases = [ ];
@@ -61,13 +61,14 @@ let
         );
     }
   );
-in
 
-stdenvNoCC.mkDerivation {
-  inherit name;
-  inherit bash coreutils;
-  inherit package packageName binNameAndPaths;
-  envSetupScript = env.setupScript;
-  builder = ./builder.sh;
-  inherit passthru;
-}
+  drv = stdenvNoCC.mkDerivation {
+    inherit name;
+    inherit bash coreutils;
+    inherit package packageName binNameAndPaths;
+    envSetupScript = env.setupScript;
+    builder = ./builder.sh;
+    inherit passthru;
+  };
+
+in drv
