@@ -30,8 +30,8 @@ let
         url = "https://github.com/zetavg/neofetch-web.git";
         ref = "master";
         rev = "1312d37ebbcd38ef72881e43e90f0358291e31e1";
-      } + /package.nix
-    ) { pkgs = self.pkgs; };
+      }
+    ) { inherit pkgs mkNodePackageWithRuntime; };
 
     buildRubyGem = callPackage ./pkgs/development/ruby/gem {
       buildRubyGem = super.buildRubyGem;
