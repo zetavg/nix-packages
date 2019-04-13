@@ -9,7 +9,9 @@ let
 in {
   lib = extendLib (self: super: let
     callLibs = file: import file { lib = self; };
+    callLibsOverride = file: import file { lib = super; };
   in with self; {
+    assertMsg = callLibsOverride ./lib/assertMsg.nix;
     join = callLibs ./lib/join.nix;
     removeExtensionFromFilename = callLibs ./lib/removeExtensionFromFilename.nix;
     toYaml = callLibs ./lib/toYaml.nix;
