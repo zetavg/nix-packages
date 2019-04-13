@@ -234,6 +234,19 @@ export const asyncNpmPackageToNix = async (pkg, pkgLock, tmpDir = shell.tempdir(
     getFlattenedDependencyNameAndVersionsFrom(pkgLock),
   )
 
+  const nixMetadata = packageMetadataToNix(pkg)
+
+  if (pkg.scripts && pkg.scripts.start) {
+    nixMetadata.startScript = pkg.scripts.start
+    const [,, startupFile] = nixMetadata.startScript.match(/node ['"]?(\.\/)?([._\-+a-zA-Z0-9/\\]+)['"]?/)
+    if (startupFile) nixMetadata.startupFile = startupFile
+  }
+
+  if (typeof pkg.publicRoot === 'string') {
+    const [,, pr] = pkg.publicRoot.match(/(\.\/)?([._\-+a-zA-Z0-9/\\]+)/)
+    if (pr) nixMetadata.publicRoot = pr
+  }
+
   let dependencyIgnoreRules = null
   if (pkg.nixDependencyIgnoreRules) {
     const rules = pkg.nixDependencyIgnoreRules
@@ -251,7 +264,7 @@ export const asyncNpmPackageToNix = async (pkg, pkgLock, tmpDir = shell.tempdir(
   )
 
   const nixAttrs = {
-    ...packageMetadataToNix(pkg),
+    ...nixMetadata,
     dependencyIgnoreRules,
     ...dependenciesAttrs,
   }

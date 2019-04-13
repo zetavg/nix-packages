@@ -13,7 +13,7 @@ attrs:
 
 let
   inherit (builtins) toPath;
-  inherit (lib) mapAttrsToList;
+  inherit (lib) filterAttrs mapAttrsToList concatStringsSep assertMsg;
 
   name = "${nodejs.name}-${package.nameWithoutVersion}-${package.version}+runtime";
   package = mkNodePackage nodejs attrs;
@@ -24,16 +24,43 @@ let
     name: path: "${name}|${packageName}/${path}"
   ) (package.bin or {});
 
-  passthru = package.passthru // env.passthru // {
-    devShell = stdenvNoCC.mkDerivation {
-      name = "${name}-dev-shell";
-      phases = [ ];
-      setupScript = devEnv.setupScript;
-      shellHook = ''
-        source $setupScript
-      '';
-    };
-  };
+  passthru = package.passthru // env.passthru // (
+    let
+      pn = package.packageName;
+      sf = package.startupFile or "";
+      pr = package.publicRoot or "";
+    in rec {
+      startupFile = if (sf != "") then "${pn}/${sf}" else null;
+      publicRoot = if (pr != "") then "${pn}/${pr}" else null;
+      devShell = stdenvNoCC.mkDerivation {
+        name = "${name}-dev-shell";
+        phases = [ ];
+        setupScript = devEnv.setupScript;
+        shellHook = ''
+          source $setupScript
+        '';
+      };
+      getNginxPassengerConfig = { passenger }:
+        assert (
+          assertMsg (startupFile != null) "startupFile must be set"
+          && assertMsg (publicRoot != null) "publicRoot must be set"
+        ); ''
+          passenger_enabled on;
+          passenger_app_type node;
+          passenger_startup_file ${startupFile};
+          passenger_nodejs ${nodejs}/bin/node;
+          passenger_env_var PATH ${env.path};
+          passenger_env_var NODE_PATH ${passenger.nodejs_supportlib}:${env.nodePath};
+        '' + concatStringsSep "\n" (
+          mapAttrsToList (
+            n: v:
+            "passenger_env_var ${n} ${v};"
+          ) (
+            filterAttrs (n: v: v != null && v != "") env.environmentVariables
+          )
+        );
+    }
+  );
 in
 
 stdenvNoCC.mkDerivation {
