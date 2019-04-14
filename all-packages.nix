@@ -43,8 +43,12 @@ let
     nginx-with-passenger = callPackage ./pkgs/servers/nginx-with-passenger.nix { };
 
     sample-rails-app = callPackage (
-      fetchTarball "https://github.com/zetavg/rails-nix-sample/archive/master.tar.gz"
-    ) { pkgs = self.pkgs; };
+      builtins.fetchGit {
+        url = "https://github.com/zetavg/rails-nix-sample.git";
+        ref = "master";
+        rev = "22b727b95ea7c9e5eca013a794e0d526caa7f4d5";
+      }
+    ) { inherit pkgs buildRailsApp; };
 
     overlays-compat = callPackage ./pkgs/os-specific/nixos/overlays-compat.nix { };
 
