@@ -4,7 +4,8 @@
     repo = "nixpkgs";
     rev = "19.03-beta";
     sha256 = "1wr6dzy99rfx8s399zjjjcffppsbarxl2960wgb0xjzr7v65pikz";
-  }) { },
+  }) { inherit overlays; },
+  overlays ? [],
   ...
 }:
 let
