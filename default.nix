@@ -4,14 +4,15 @@
     repo = "nixpkgs";
     rev = "19.03-beta";
     sha256 = "1wr6dzy99rfx8s399zjjjcffppsbarxl2960wgb0xjzr7v65pikz";
-  }) { inherit overlays; },
+  }) { },
   overlays ? [],
   ...
 }:
 let
   inherit (builtins) hasAttr trace foldl';
-  overlays = import ./manifest.nix;
+  package-overlays = import ./manifest.nix;
+  all-overlays = package-overlays ++ overlays;
 in if hasAttr "appendOverlays" pkgs then
-  pkgs.appendOverlays overlays
+  pkgs.appendOverlays all-overlays
 else
-  (import ./lib/manuallyAppendOverlaysToPkgs.nix { }) pkgs overlays
+  (import ./lib/manuallyAppendOverlaysToPkgs.nix { }) pkgs all-overlays
