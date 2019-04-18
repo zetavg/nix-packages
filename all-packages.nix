@@ -50,6 +50,9 @@ let
       }
     ) { inherit pkgs buildRailsApp; };
 
+    composeXcodeWrapper = callPackage ./pkgs/development/mobile/compose-xcodewrapper.nix { };
+    xcode_10_2 = callPackage ./pkgs/development/mobile/xcode_10_2.nix { };
+
     overlays-compat = callPackage ./pkgs/os-specific/nixos/overlays-compat.nix { };
 
     # Log the differentials we made to the nixpkgs-diff attr. Do aware that
