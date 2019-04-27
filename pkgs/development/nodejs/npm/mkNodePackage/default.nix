@@ -31,6 +31,9 @@ nodejs:
   dependencies ? { },
   devDependencies ? { },
 
+  # Build inputs for "installed" package
+  buildInputs ? [ ],
+
   ...
 } @ attrs:
 
@@ -44,7 +47,7 @@ let
     # TODO: Add support for git sources
     else throw "mkNodePackage: don't know how to build node package ${attrs.name or "undefined-name"}, attrs are ${toJSON attrs}";
   package' = if !hasInstallationHooks then package else mkInstalledNpmPackage {
-    inherit nodejs package;
+    inherit nodejs package buildInputs;
   };
   # Bundle the package if it have privateDependencies
   package'' = if privateDependencies == { } then package' else mkNpmPackageBundle {

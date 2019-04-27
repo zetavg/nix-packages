@@ -6,6 +6,7 @@
 {
   nodejs
 , package
+, buildInputs ? []
 , ...
 }:
 
@@ -20,7 +21,7 @@ in
 stdenvNoCC.mkDerivation {
   inherit name package;
   builder = ./builder.sh;
-  buildInputs = [ nodejs ];
+  buildInputs = [ nodejs ] ++ buildInputs;
   setupNodeEnvScript = nodeEnv.setupScript;
   inherit passthru;
 }

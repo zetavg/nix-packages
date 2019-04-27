@@ -1,4 +1,4 @@
-{ lib, stdenv, system, mkNodeEnv, mkNodePackage }:
+{ pkgs, lib, stdenv, system, mkNodeEnv, mkNodePackage }:
 
 nodejs:
 {
@@ -8,6 +8,7 @@ nodejs:
 }:
 {
   name,
+  dependencyBuildInputs ? {},
   dependencyIgnoreRules ? {},
   dependencies ? {},
   devDependencies ? {},
@@ -15,7 +16,7 @@ nodejs:
 }:
 
 let
-  inherit (builtins) isFunction isBool hasAttr;
+  inherit (builtins) isFunction isBool isAttrs hasAttr;
   inherit (lib) mapAttrs filterAttrs;
   envName =
     if production then "${nodejs.name}-${name}-env"
@@ -48,8 +49,21 @@ let
     else dependencies // devDependencies
   );
   nodeModules = mapAttrs (
-    n: v:
-    mkNodePackage nodejs v
+    name: attrs:
+    let
+      hasDependencyBuildInputs = hasAttr name dependencyBuildInputs;
+      buildInputs =
+        let
+          buildInputsValue = dependencyBuildInputs.${name};
+          buildInputsValue' =
+            if isAttrs buildInputsValue then buildInputsValue
+            else if isFunction buildInputsValue then buildInputsValue { inherit pkgs lib stdenv system; }
+            else null;
+        in buildInputsValue';
+      attrs' =
+        if hasDependencyBuildInputs then attrs // { inherit buildInputs; }
+        else attrs;
+    in mkNodePackage nodejs attrs'
   ) dependenciesToInstall;
 in mkNodeEnv {
   name = envName;
