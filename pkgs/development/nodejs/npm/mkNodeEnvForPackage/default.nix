@@ -1,4 +1,4 @@
-{ pkgs, lib, stdenv, system, mkNodeEnv, mkNodePackage }:
+{ lib, callPackage, mkNodeEnv, mkNodePackage }:
 
 nodejs:
 {
@@ -9,6 +9,7 @@ nodejs:
 {
   name,
   dependencyBuildInputs ? {},
+  dependencyPatchPhases ? {},
   dependencyIgnoreRules ? {},
   dependencies ? {},
   devDependencies ? {},
@@ -31,7 +32,7 @@ let
           expr = dependencyIgnoreRules."${packageName}" or false;
           shouldIgnore =
             if isBool expr then expr
-            else if isFunction expr then expr { inherit lib stdenv system; }
+            else if isFunction expr then callPackage expr { }
             else null;
         in
           if isBool shouldIgnore then !shouldIgnore
@@ -57,13 +58,25 @@ let
           buildInputsValue = dependencyBuildInputs.${name};
           buildInputsValue' =
             if isAttrs buildInputsValue then buildInputsValue
-            else if isFunction buildInputsValue then buildInputsValue { inherit pkgs lib stdenv system; }
+            else if isFunction buildInputsValue then callPackage buildInputsValue { }
             else null;
         in buildInputsValue';
+      hasDependencyPatchPhase = hasAttr name dependencyPatchPhases;
+      patchPhase =
+        let
+          patchPhaseValue = dependencyPatchPhases.${name};
+          patchPhaseValue' =
+            if isAttrs patchPhaseValue then patchPhaseValue
+            else if isFunction patchPhaseValue then callPackage patchPhaseValue { }
+            else null;
+        in patchPhaseValue';
       attrs' =
         if hasDependencyBuildInputs then attrs // { inherit buildInputs; }
         else attrs;
-    in mkNodePackage nodejs attrs'
+      attrs'' =
+        if hasDependencyPatchPhase then attrs' // { inherit patchPhase; }
+        else attrs';
+    in mkNodePackage nodejs attrs''
   ) dependenciesToInstall;
 in mkNodeEnv {
   name = envName;

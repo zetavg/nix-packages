@@ -269,6 +269,17 @@ export const asyncNpmPackageToNix = async (pkg, pkgLock, tmpDir = shell.tempdir(
       ), {})
   }
 
+  let dependencyPatchPhases = null
+  if (pkg.nixDependencyPatchPhases) {
+    const rules = pkg.nixDependencyPatchPhases
+    dependencyPatchPhases = Object.keys(rules)
+      .map(key => [key, rules[key]])
+      .map(([name, expr]) => [name, new nijs.NixExpression(expr)])
+      .reduce((
+        (obj, [key, value]) => (obj[key] = value, obj)
+      ), {})
+  }
+
   const dependenciesAttrs = await asyncPackageLockDependenciesToNixDependenciesAndDevDependencies(
     pkgLock.dependencies,
     packageMetadataStore,
@@ -278,6 +289,7 @@ export const asyncNpmPackageToNix = async (pkg, pkgLock, tmpDir = shell.tempdir(
     ...nixMetadata,
     dependencyBuildInputs,
     dependencyIgnoreRules,
+    dependencyPatchPhases,
     ...dependenciesAttrs,
   }
   cleanObjectInplace(nixAttrs)

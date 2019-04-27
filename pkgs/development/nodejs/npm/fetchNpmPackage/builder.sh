@@ -18,3 +18,11 @@ done
 
 # Patch shebangs (/usr/bin/env)
 find $out/ -type f -print0 | xargs -0 sed -i "s|/usr/bin/env|$env|g"
+
+# Apply custom patches
+cd $out
+if [ ! -z "$patchPhase" ]; then
+  eval "$patchPhase"
+else
+  patchPhase
+fi

@@ -27,6 +27,7 @@ in
 , tarball ? null
   # Executables that this package provided
 , bin ? {}
+, patchPhase ? null
 , ...
 } @ attrs:
 
@@ -48,6 +49,6 @@ stdenvNoCC.mkDerivation {
   src = source;
   builder = ./builder.sh;
   env = "${coreutils}/bin/env";
-  inherit binPaths;
+  inherit binPaths patchPhase;
   inherit passthru;
 }
