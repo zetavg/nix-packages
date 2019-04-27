@@ -37,6 +37,7 @@ let
   derivationName =
     if name != "" && version != "" then "npm-${name}-${version}"
     else throw "fetchNpmPackage requires `name` and `version` to be set";
+  binPaths = builtins.attrValues bin;
   passthru = attrs // {
     nameWithoutVersion = name;
   };
@@ -47,5 +48,6 @@ stdenvNoCC.mkDerivation {
   src = source;
   builder = ./builder.sh;
   env = "${coreutils}/bin/env";
+  inherit binPaths;
   inherit passthru;
 }

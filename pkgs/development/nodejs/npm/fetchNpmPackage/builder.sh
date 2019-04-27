@@ -11,5 +11,10 @@ for i in npm-unpacked/*; do
   fi
 done
 
+# Make bins executable
+for binPath in $binPaths; do
+  chmod +x "$out/$binPath"
+done
+
 # Patch shebangs (/usr/bin/env)
 find $out/ -type f -print0 | xargs -0 sed -i "s|/usr/bin/env|$env|g"
