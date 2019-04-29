@@ -189,8 +189,10 @@ export const asyncPackageLockDependenciesToNixDependenciesAndDevDependencies = a
     .map(([lockEntry, nixMetadata, privateDependencydata, dependencydata]) => {
       const nixAttrs = {
         ...nixMetadata,
-        privateDependencies: privateDependencydata.dependencies,
-        privateDevDependencies: privateDependencydata.devDependencies,
+        privateDependencies: {
+          ...(privateDependencydata.dependencies || {}),
+          ...(privateDependencydata.devDependencies || {}),
+        },
         dependencies: dependencydata.dependencies,
         devDependencies: dependencydata.devDependencies,
       }
