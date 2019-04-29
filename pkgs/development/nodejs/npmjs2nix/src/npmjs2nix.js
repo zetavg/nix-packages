@@ -101,7 +101,7 @@ export const getSourceFromPackageLockDependencyEntry = (dependencyEntry) => {
   const versionType = getVersionType(dependencyEntry.version)
   switch (versionType) {
     case 'semver': {
-      const [, hashType, hash] = dependencyEntry.integrity.match(/^([^-]+)-(.+)$/)
+      const [, hashType, hash] = dependencyEntry.integrity.match(/^([^-]+)-(.+)$/) || []
       return {
         tarball: {
           url: dependencyEntry.resolved,
@@ -238,12 +238,12 @@ export const asyncNpmPackageToNix = async (pkg, pkgLock, tmpDir = shell.tempdir(
 
   if (pkg.scripts && pkg.scripts.start) {
     nixMetadata.startScript = pkg.scripts.start
-    const [,, startupFile] = nixMetadata.startScript.match(/node ['"]?(\.\/)?([._\-+a-zA-Z0-9/\\]+)['"]?/)
+    const [,, startupFile] = nixMetadata.startScript.match(/node ['"]?(\.\/)?([._\-+a-zA-Z0-9/\\]+)['"]?/) || []
     if (startupFile) nixMetadata.startupFile = startupFile
   }
 
   if (typeof pkg.publicRoot === 'string') {
-    const [,, pr] = pkg.publicRoot.match(/(\.\/)?([._\-+a-zA-Z0-9/\\]+)/)
+    const [,, pr] = pkg.publicRoot.match(/(\.\/)?([._\-+a-zA-Z0-9/\\]+)/) || []
     if (pr) nixMetadata.publicRoot = pr
   }
 
