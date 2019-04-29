@@ -18,8 +18,8 @@ let
     if length listOfNodejs == 0 then null
     else if length listOfNodejs == 1 then head listOfNodejs
     else throw "Multiple nodejs versions detected in the bundle: ${concatStringsSep ", " (map (n: n.version) listOfNodejs)}, the bundle only allows packages that are independent with nodejs version, or built with a same nodejs version.";
-  baseName = "npm${optionalString (nodejs != null) "-${nodejs.name}"}-bundle-${package.nameWithoutVersion}-${package.name}";
-  longName = concatStringsSep "+" ([ baseName ] ++ map (pkg: "${pkg.nameWithoutVersion}-${pkg.name}") bundlePackagesList);
+  baseName = "npm${optionalString (nodejs != null) "-${nodejs.name}"}-bundle-${package.nameWithoutVersion}-${package.version}";
+  longName = concatStringsSep "+" ([ baseName ] ++ map (pkg: "${pkg.nameWithoutVersion}-${pkg.version}") bundlePackagesList);
   shortName = "${baseName}-with-some-dependencies";
   name =
     if stringLength longName <= 128 then longName

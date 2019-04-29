@@ -52,6 +52,6 @@ let
   # Bundle the package if it have privateDependencies
   package'' = if privateDependencies == { } then package' else mkNpmPackageBundle {
     package = package';
-    bundlePackages = mapAttrs (n: v: mkNodePackage nodejs v) dependencies;
+    bundlePackages = mapAttrs (n: v: mkNodePackage nodejs v) privateDependencies;
   };
 in package''
