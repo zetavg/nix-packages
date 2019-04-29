@@ -22,6 +22,10 @@ for binNameAndPath in $binNameAndPaths; do
   ln -sf "$sourcePath" "$out/node_modules/.bin/$binName"
 done
 
+# Create "lib" directory
+mkdir -p "$out/lib"
+ln -rsf "$out/node_modules" "$out/lib/node_modules"
+
 path="$systemPaths:$out/node_modules/.bin"
 nodePath="$out/node_modules"
 
