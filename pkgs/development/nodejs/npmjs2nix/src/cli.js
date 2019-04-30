@@ -23,7 +23,7 @@ const argv = yargs
   })
   .option('o', {
     alias: 'output',
-    default: './npm-package.nix',
+    default: shell.ls('./npm-package.nix*')[0] || './npm-package.nix',
     describe: 'Output .nix file',
     type: 'string',
   })
