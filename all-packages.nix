@@ -20,10 +20,10 @@ let
     mkNodePackageWithRuntime = callPackage ./pkgs/development/nodejs/npm/mkNodePackageWithRuntime { };
     npmjs2nix = callPackage ./pkgs/development/nodejs/npmjs2nix/package.nix { };
 
-    npm = callPackage ./pkgs/development/nodejs/npm { };
-    mkNodeEnvDerivation = npm.mkNodeEnv;
-    mkNpmPackageDerivation = npm.mkNpmPackageWithRuntime;
-    npm-package-to-nix = callPackage ./pkgs/development/nodejs/npm-package-to-nix/package.nix { };
+    # npm = callPackage ./pkgs/development/nodejs/npm { };
+    # mkNodeEnvDerivation = npm.mkNodeEnv;
+    # mkNpmPackageDerivation = npm.mkNpmPackageWithRuntime;
+    # npm-package-to-nix = callPackage ./pkgs/development/nodejs/npm-package-to-nix/package.nix { };
 
     neofetch-web = callPackage (
       builtins.fetchGit {
