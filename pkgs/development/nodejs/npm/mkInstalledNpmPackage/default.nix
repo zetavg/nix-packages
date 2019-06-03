@@ -11,7 +11,10 @@
 }:
 
 let
-  name = "npm-${nodejs.name}-${package.nameWithoutVersion}-${package.version}";
+  name =
+    # Prevent "Esy prefix path is too deep in the filesystem" error
+    if package.nameWithoutVersion == "reason-cli" then "reason-cli-${package.version}"
+    else "npm-${nodejs.name}-${package.nameWithoutVersion}-${package.version}";
   nodeEnv = mkNodeEnvForPackage nodejs { production = true; } package; # Same as mkNodeEnvForPackage nodejs package.passthru
   passthru = package.passthru // {
     inherit nodejs;
