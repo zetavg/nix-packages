@@ -35,6 +35,7 @@
 
   masterKey ? null,
   developmentSecret ? null,
+  databaseConfig ? null,
   actionCableConfig ? null,
 
   packagePriority ? 100,
@@ -63,6 +64,13 @@ let
     BUNDLE_WITHOUT: "${bundleWithout}"
   '';
 
+  databaseConfigFile = if databaseConfig != null then
+    writeText "database.yml" (toYaml {
+      development = databaseConfig;
+      test = databaseConfig;
+      production = databaseConfig;
+    })
+  else null;
   actionCableConfigFile = if actionCableConfig != null then
     writeText "cable.yml" (toYaml {
       development = actionCableConfig;
@@ -174,6 +182,8 @@ let
         printf ${developmentSecret} > rails-build/tmp/development_secret.txt
       '' + optionalString (masterKey != null) ''
         printf ${masterKey} > rails-build/config/master.key
+      '' + optionalString (databaseConfigFile != null) ''
+        cp -f ${databaseConfigFile} rails-build/config/database.yml
       '' + optionalString (actionCableConfigFile != null) ''
         cp -f ${actionCableConfigFile} rails-build/config/cable.yml
       '';
@@ -207,11 +217,14 @@ let
           print \"Gem.clear_paths\"\
         } NR!=0" "config.ru"
       cd -
-      # Explicity set RubyGems and Bundler config in every binstub and Ruby scripts
+      # Chdir to project root, set ENV['DISABLE_DUMP_SCHEMA_AFTER_MIGRATION'],
+      # explicity set RubyGems and Bundler config in every binstub and Ruby scripts
       cd $out/bin
       for file in *; do
         awk -i inplace "NR==1 {\
           print; \
+          print \"Dir::chdir('$out')\"; \
+          print \"ENV['DISABLE_DUMP_SCHEMA_AFTER_MIGRATION'] = 'true'\"; \
           print \"ENV['GEM_HOME'] = '${gemHome}'\"; \
           print \"ENV['BUNDLE_GEMFILE'] = '${bundleGemfile}'\"; \
           print \"ENV['BUNDLE_PATH'] = '${bundlePath}'\"; \
