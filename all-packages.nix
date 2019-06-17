@@ -33,9 +33,9 @@ let
       }
     ) { inherit pkgs mkNodePackageWithRuntime; };
 
-    buildRubyGem = callPackage ./pkgs/development/ruby/gem {
-      buildRubyGem = super.buildRubyGem;
-    };
+    # buildRubyGem = callPackage ./pkgs/development/ruby/gem {
+    #   buildRubyGem = super.buildRubyGem;
+    # };
     buildRailsApp = callPackage ./pkgs/development/ruby/rails-app { };
 
     passenger = callPackage ./pkgs/servers/passenger { };
