@@ -183,10 +183,10 @@ To craft software that are buildable via nix with the help of this package colle
   #     # https://github.com/zetavg/nix-packages/commits/master
   #     rev = "...";
   #   }
-  # ) { /* pkgs = import <nixpkgs> { } */ }, # If you want to use <nixpkgs>
+  # ) { },
   pkgs ? import (
     builtins.fetchTarball "https://git.io/zpkgs-archive-master"
-  ) { /* pkgs = import <nixpkgs> { } */ }, # If you want to use <nixpkgs>
+  ) { /* pkgs = import <nixpkgs> { } # If you want to use system <nixpkgs> rather then the nixpkgs version pinned in zpkgs */ },
   nodejs ? pkgs.nodejs,
   mkNodePackageWithRuntime ? pkgs.mkNodePackageWithRuntime,
   ...

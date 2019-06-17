@@ -2,14 +2,16 @@
   pkgs ? import ((import <nixpkgs> { }).fetchFromGitHub {
     owner = "NixOS";
     repo = "nixpkgs";
-    rev = "19.03-beta";
-    sha256 = "1wr6dzy99rfx8s399zjjjcffppsbarxl2960wgb0xjzr7v65pikz";
+    rev = "19.03";
+    # Get the sha256 by command:
+    # nix-prefetch-git --rev <rev> --no-deepClone https://github.com/NixOS/nixpkgs.git
+    sha256 = "0q2m2qhyga9yq29yz90ywgjbn9hdahs7i8wwlq7b55rdbyiwa5dy";
   }) { },
   overlays ? [],
   ...
 }:
 let
-  inherit (builtins) hasAttr trace foldl';
+  inherit (builtins) hasAttr;
   package-overlays = import ./manifest.nix;
   all-overlays = package-overlays ++ overlays;
 in if hasAttr "appendOverlays" pkgs then
