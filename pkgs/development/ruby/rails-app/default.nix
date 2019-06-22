@@ -37,6 +37,9 @@
   developmentSecret ? null,
   databaseConfig ? null,
   actionCableConfig ? null,
+  dotEnv ? null,
+  applicationConfig ? null,
+  pidFile ? null,
 
   packagePriority ? 100,
 
@@ -77,6 +80,16 @@ let
       test = actionCableConfig;
       production = actionCableConfig;
     })
+  else null;
+  applicationConfigFile = if applicationConfig != null then
+    writeText "application.yml" (toYaml {
+      development = applicationConfig;
+      test = applicationConfig;
+      production = applicationConfig;
+    })
+  else null;
+  dotEnvFile = if dotEnv != null then
+    writeText "dot-env" dotEnv
   else null;
 
   getShellHook =
@@ -186,6 +199,17 @@ let
         cp -f ${databaseConfigFile} rails-build/config/database.yml
       '' + optionalString (actionCableConfigFile != null) ''
         cp -f ${actionCableConfigFile} rails-build/config/cable.yml
+      '' + optionalString (applicationConfigFile != null) ''
+        cp -f ${applicationConfigFile} rails-build/config/application.yml
+      '' + optionalString (dotEnvFile != null) ''
+        cp -f ${dotEnvFile} rails-build/.env
+      '' + optionalString (pidFile != null) ''
+        awk -i inplace "NR==1 {print \"ENV['PIDFILE'] = '${pidFile}'\"} NR!=0" "rails-build/config.ru"
+        cd rails-build/bin
+        for file in *; do
+          awk -i inplace "NR==1 {print; print \"ENV['PIDFILE'] = '${pidFile}'\"} NR!=1" "$file"
+        done
+        cd -
       '';
     buildPhase = ''
       cd rails-build
