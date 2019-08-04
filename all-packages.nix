@@ -33,6 +33,22 @@ let
       }
     ) { inherit pkgs mkNodePackageWithRuntime; };
 
+    # The modify of buildRubyGem is disabled because it will break things in these
+    # cases:
+    #
+    #   - Error: builder for '/nix/store/zkdhy0gg8v0sr745hq41lhlvr947ay0w-bundler-1.17.2-gem.drv' failed with exit code 1; last 3 log lines:
+    #            installing
+    #            buildFlags:
+    #            failure: $gempkg path unspecified
+    #
+    #   - Error: patching script interpreter paths in /nix/store/nfjqfbw0vrywp82ygpp0qrgw0hpbs2gp-ruby2.5.5-mathematical-1.6.11
+    #            checking for references to /tmp/nix-build-ruby2.5.5-mathematical-1.6.11.drv-0/ in /nix/store/nfjqfbw0vrywp82ygpp0qrgw0hpbs2gp-ruby2.5.5-mathematical-1.6.11...
+    #            open: Permission denied
+    #     Reason: The patch to mathematical.so cannot be applied because mathematical.so
+    #     is in the shared gem source code directory, which belongs to a seperaterated
+    #     packages, that is already built and is read-only
+    #     (See nixpkgs/pkgs/tools/typesetting/asciidoctor/default.nix, postFixup phase).
+    #
     # buildRubyGem = callPackage ./pkgs/development/ruby/gem {
     #   buildRubyGem = super.buildRubyGem;
     # };
