@@ -1,6 +1,6 @@
 # Copied from https://github.com/betaboon/nixpkgs/blob/elastic-apm-server/pkgs/servers/misc/elastic-apm-server/default.nix
 
-{ elk6Version
+{ elk7Version ? "7.0.1"
 , enableUnfree ? true
 , stdenv
 , fetchurl
@@ -15,22 +15,23 @@ let
   info = splitString "-" stdenv.hostPlatform.system;
   arch = elemAt info 0;
   plat = elemAt info 1;
+  # For "7.0.1"
   shas =
     if enableUnfree
     then {
-      "x86-linux" = "0xa7jfsmg6mzw881k7j8rkph586dpcl7afycdds70n43ixrqsp07";
-      "x86_64-linux" = "0cw0xqx4zyanhbh6irpkn9anw00navwqnfhzpwxpmkmn7w4lj64b";
-      "x86_64-darwin" = "0b15m4j11qirbkq30i7m5xd51jz39ym8qiah18276vc6i7h13zbf";
+      "x86-linux" = "17hfbnb1sh3g9823nxwa2ilwvfp7illhkw35crcalpzvlj7binm7";
+      "x86_64-linux" = "0a7pjh10ayyy4il2f69zcacfa7dqybsz24v4lfcqlbwlb5yqsd8r";
+      "x86_64-darwin" = "1a4qv6754g3k9z7pa89lg2lmdwiwrp0iyh7krgdsj5g4ni0b1w7l";
     }
     else {
-      "x86-linux" = "0iq34g4ypbdbwbaiyaicj0zj9c0xdryd6b3y0dxcdbhywjn32a5v";
-      "x86_64-linux" = "09nb2n4mn1bp4iprgrks3d2chxsd7a5wzys969vfxxc54y9bhy8x";
-      "x86_64-darwin" = "1nr75mygiza6l5v3daqsf2cpb47hkjpv0mnajlhacpf24cvvxlkb";
+      "x86-linux" = "19n96xgg5f9gdllgrrgvc40j4qy1vx2s9kvvaaq2n74l3bmifrm3";
+      "x86_64-linux" = "045qg6639arb4isvxz3pkv3mnl37zgkwvzrvggfqwqi93giffz1k";
+      "x86_64-darwin" = "1dnk3616706rkn6rwf9nha1kjwgagyv5w6zp4mqwc0j6gzbv9nrg";
     };
 
 in stdenv.mkDerivation (rec {
   name = "apm-server-${optionalString (!enableUnfree) "oss-"}${version}";
-  version = elk6Version;
+  version = elk7Version;
 
   src = fetchurl {
     url = "https://artifacts.elastic.co/downloads/apm-server/${name}-${plat}-${arch}.tar.gz";
