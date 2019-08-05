@@ -3894,10 +3894,10 @@
     mixin-deep = {
       name = "mixin-deep";
       packageName = "mixin-deep";
-      version = "1.3.1";
+      version = "1.3.2";
       tarball = {
-        url = "https://registry.npmjs.org/mixin-deep/-/mixin-deep-1.3.1.tgz";
-        sha512 = "8ZItLHeEgaqEvd5lYBXfm4EZSFCX29Jb9K+lAHhDKzReKBQKj3R+7NOF6tjqYi9t4oI8VUfaWITJQm86wnXGNQ==";
+        url = "https://registry.npmjs.org/mixin-deep/-/mixin-deep-1.3.2.tgz";
+        sha512 = "WRoDn//mXBiJ1H40rqa3vH0toePwSsGb45iInWlTySa+Uu4k3tYUSxa2v1KqAiLtvlrSzaExqS1gtk96A9zvEA==";
       };
       privateDependencies = {
         is-extendable = {
@@ -4197,10 +4197,10 @@
     set-value = {
       name = "set-value";
       packageName = "set-value";
-      version = "2.0.0";
+      version = "2.0.1";
       tarball = {
-        url = "https://registry.npmjs.org/set-value/-/set-value-2.0.0.tgz";
-        sha512 = "hw0yxk9GT/Hr5yJEYnHNKYXkIA8mVJgd9ditYZCe16ZczcaELYYcfvaXesNACk2O8O0nTiPQcQhGUQj8JLzeeg==";
+        url = "https://registry.npmjs.org/set-value/-/set-value-2.0.1.tgz";
+        sha512 = "JxHc1weCN68wRY0fhCoXpyK55m/XPHafOmK4UWD7m2CI14GMcFypt4w/0+NV5f/ZMby2F6S2wwA7fgynh9gWSw==";
       };
       privateDependencies = {
         extend-shallow = {
