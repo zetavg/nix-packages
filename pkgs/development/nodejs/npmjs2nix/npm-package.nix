@@ -1687,7 +1687,7 @@
         url = "https://registry.npmjs.org/@babel/core/-/core-7.4.3.tgz";
         sha512 = "oDpASqKFlbspQfzAE7yaeTmdljSH2ADIvBlb0RwbStltTuWa0+7CCI1fYVINNv9saHPa1W7oaKeuNuKj+RQCvA==";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         debug = {
           name = "debug";
           packageName = "debug";
@@ -2295,7 +2295,7 @@
         url = "https://registry.npmjs.org/@babel/traverse/-/traverse-7.4.3.tgz";
         sha512 = "HmA01qrtaCwwJWpSKpA948cBvU5BrmviAief/b3AVw936DtcdsTexlbyzNuDnthwhOQ37xshn7hvQaEQk7ISYQ==";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         debug = {
           name = "debug";
           packageName = "debug";
@@ -2333,7 +2333,7 @@
         url = "https://registry.npmjs.org/anymatch/-/anymatch-2.0.0.tgz";
         sha512 = "5teOsQWABXHHBFP9y3skS5P3d/WfWXpv3FUpy+LorMrNYaT9pI4oLMQX7jzQ2KklNpGpWHzdCXTDT2Y3XGlZBw==";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         normalize-path = {
           name = "normalize-path";
           packageName = "normalize-path";
@@ -2419,7 +2419,7 @@
         url = "https://registry.npmjs.org/base/-/base-0.11.2.tgz";
         sha512 = "5T6P4xPgpp0YDFvSWwEZ4NoE3aM4QBQXDzmVbraCkFj8zHM+mba8SyqB5DbZWyR7mYHo6Y7BdQo3MoA4m0TeQg==";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         define-property = {
           name = "define-property";
           packageName = "define-property";
@@ -2475,7 +2475,7 @@
         url = "https://registry.npmjs.org/braces/-/braces-2.3.2.tgz";
         sha512 = "aNdbnj9P8PjdXU4ybaWLK2IF3jc/EoDYbC7AazW6to3TRsfXxscC9UXOB5iDiEQrkyIbWp2SLQda4+QAa7nc3w==";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         extend-shallow = {
           name = "extend-shallow";
           packageName = "extend-shallow";
@@ -2543,7 +2543,7 @@
         url = "https://registry.npmjs.org/class-utils/-/class-utils-0.3.6.tgz";
         sha512 = "qOhPa/Fj7s6TY8H8esGu5QNpMMQxz79h+urzrNYN6mn+9BnxlDGf5QZ+XeCDsxSjPqsSR56XOZOJmpeurnLMeg==";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         define-property = {
           name = "define-property";
           packageName = "define-property";
@@ -2626,7 +2626,7 @@
         url = "https://registry.npmjs.org/core-js-compat/-/core-js-compat-3.0.1.tgz";
         sha512 = "2pC3e+Ht/1/gD7Sim/sqzvRplMiRnFQVlPpDVaHtY9l7zZP7knamr3VRD6NyGfHd84MrDC0tAM9ulNxYMW0T3g==";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         semver = {
           name = "semver";
           packageName = "semver";
@@ -2667,7 +2667,7 @@
         url = "https://registry.npmjs.org/define-property/-/define-property-2.0.2.tgz";
         sha512 = "jwK2UV4cnPpbcG7+VRARKTZPUWowwXA8bzH5NP6ud0oeAxyYPuGZUAC7hMugpCdz4BeSZl2Dl9k66CHJ/46ZYQ==";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         is-accessor-descriptor = {
           name = "is-accessor-descriptor";
           packageName = "is-accessor-descriptor";
@@ -2732,7 +2732,7 @@
         url = "https://registry.npmjs.org/expand-brackets/-/expand-brackets-2.1.4.tgz";
         sha1 = "t3c14xXOMPa27/D4OwQVGiJEliI=";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         debug = {
           name = "debug";
           packageName = "debug";
@@ -2779,7 +2779,7 @@
         url = "https://registry.npmjs.org/extend-shallow/-/extend-shallow-3.0.2.tgz";
         sha1 = "Jqcarwc7OfshJxcnRhMcJwQCjbg=";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         is-extendable = {
           name = "is-extendable";
           packageName = "is-extendable";
@@ -2799,7 +2799,7 @@
         url = "https://registry.npmjs.org/extglob/-/extglob-2.0.4.tgz";
         sha512 = "Nmb6QXkELsuBr24CJSkilo6UHHgbekK5UiZgfE6UHD3Eb27YC6oD+bhcT+tJ6cl8dmsgdQxnWlcry8ksBIBLpw==";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         define-property = {
           name = "define-property";
           packageName = "define-property";
@@ -2855,7 +2855,7 @@
         url = "https://registry.npmjs.org/fill-range/-/fill-range-4.0.0.tgz";
         sha1 = "1USBHUKPmOsGpj3EAtJAPDKMOPc=";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         extend-shallow = {
           name = "extend-shallow";
           packageName = "extend-shallow";
@@ -2961,10 +2961,10 @@
         chownr = {
           name = "chownr";
           packageName = "chownr";
-          version = "1.1.1";
+          version = "1.1.2";
           tarball = {
-            url = "https://registry.npmjs.org/chownr/-/chownr-1.1.1.tgz";
-            sha512 = "j38EvO5+LHX84jlo6h4UzmOwi0UgW61WRyPtJz4qaadK5eY3BTS5TY/S1Stc3Uk2lIM6TPevAlULiEJwie860g==";
+            url = "https://registry.npmjs.org/chownr/-/chownr-1.1.2.tgz";
+            sha512 = "GkfeAQh+QNy3wquu9oIZr6SS5x7wGdSgNQvD10X3r+AZr1Oys22HW8kAmDMvNg2+Dm0TeGaEuO8gFwdBXxwO8A==";
           };
         };
         code-point-at = {
@@ -3006,10 +3006,10 @@
         debug = {
           name = "debug";
           packageName = "debug";
-          version = "4.1.1";
+          version = "3.2.6";
           tarball = {
-            url = "https://registry.npmjs.org/debug/-/debug-4.1.1.tgz";
-            sha512 = "pYAIzeRo8J6KPEaJ0VWOh5Pzkbw/RetuzehGM7QRRX5he4fPHx2rdKMB256ehJCkX+XRQm16eZLqLNS8RSZXZw==";
+            url = "https://registry.npmjs.org/debug/-/debug-3.2.6.tgz";
+            sha512 = "mel+jf7nrtEl5Pn1Qx46zARXKDpBbvzezse7p7LqINmdoIk8PYP5SySaxEmYv6TZ0JyEKA1hsCId6DIhgITtWQ==";
           };
         };
         deep-extend = {
@@ -3045,10 +3045,10 @@
         fs-minipass = {
           name = "fs-minipass";
           packageName = "fs-minipass";
-          version = "1.2.5";
+          version = "1.2.6";
           tarball = {
-            url = "https://registry.npmjs.org/fs-minipass/-/fs-minipass-1.2.5.tgz";
-            sha512 = "JhBl0skXjUPCFH7x6x61gQxrKyXsxB5gcgePLZCwfyCGGsTISMoIeObbrvVeP6Xmyaudw4TT43qV2Gz+iyd2oQ==";
+            url = "https://registry.npmjs.org/fs-minipass/-/fs-minipass-1.2.6.tgz";
+            sha512 = "crhvyXcMejjv3Z5d2Fa9sf5xLYVCF5O1c71QxbVnbLsmYMBEvDAftewesN/HhY03YRoA7zOMxjNGrF5svGaaeQ==";
           };
         };
         "fs.realpath" = {
@@ -3072,10 +3072,10 @@
         glob = {
           name = "glob";
           packageName = "glob";
-          version = "7.1.3";
+          version = "7.1.4";
           tarball = {
-            url = "https://registry.npmjs.org/glob/-/glob-7.1.3.tgz";
-            sha512 = "vcfuiIxogLV4DlGBHIUOwI0IbrJ8HWPc4MU7HzviGeNho/UJDfi6B5p3sHeWIQ0KGIU0Jpxi5ZHxemQfLkkAwQ==";
+            url = "https://registry.npmjs.org/glob/-/glob-7.1.4.tgz";
+            sha512 = "hkLPepehmnKk41pUGm3sYxoFs/umurYfYJCerbXEyFIWcAzvpipAgVkBqqT9RBKMGjnq6kMuyYwha6csxbiM1A==";
           };
         };
         has-unicode = {
@@ -3117,10 +3117,10 @@
         inherits = {
           name = "inherits";
           packageName = "inherits";
-          version = "2.0.3";
+          version = "2.0.4";
           tarball = {
-            url = "https://registry.npmjs.org/inherits/-/inherits-2.0.3.tgz";
-            sha1 = "Yzwsg+PaQqUC9SRmAiSA9CCCYd4=";
+            url = "https://registry.npmjs.org/inherits/-/inherits-2.0.4.tgz";
+            sha512 = "k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==";
           };
         };
         ini = {
@@ -3201,31 +3201,31 @@
         ms = {
           name = "ms";
           packageName = "ms";
-          version = "2.1.1";
+          version = "2.1.2";
           tarball = {
-            url = "https://registry.npmjs.org/ms/-/ms-2.1.1.tgz";
-            sha512 = "tgp+dl5cGk28utYktBsrFqA7HKgrhgPsg6Z/EfhWI4gl1Hwq8B/GmY/0oXZ6nF8hDVesS/FpnYaD/kOWhYQvyg==";
+            url = "https://registry.npmjs.org/ms/-/ms-2.1.2.tgz";
+            sha512 = "sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==";
           };
         };
         nan = {
           name = "nan";
           packageName = "nan";
-          version = "2.13.2";
+          version = "2.14.0";
           tarball = {
-            url = "https://registry.npmjs.org/nan/-/nan-2.13.2.tgz";
-            sha512 = "TghvYc72wlMGMVMluVo9WRJc0mB8KxxF/gZ4YYFy7V2ZQX9l7rgbPg7vjS9mt6U5HXODVFVI2bOduCzwOMv/lw==";
+            url = "https://registry.npmjs.org/nan/-/nan-2.14.0.tgz";
+            sha512 = "INOFj37C7k3AfaNTtX8RhsTw7qRy7eLET14cROi9+5HAVbbHuIWUHEauBv5qT4Av2tWasiTY1Jw6puUNqRJXQg==";
           };
         };
         needle = {
           name = "needle";
           packageName = "needle";
-          version = "2.3.0";
+          version = "2.4.0";
           bin = {
             needle = "./bin/needle";
           };
           tarball = {
-            url = "https://registry.npmjs.org/needle/-/needle-2.3.0.tgz";
-            sha512 = "QBZu7aAFR0522EyaXZM0FZ9GLpq6lvQ3uq8gteiDUp7wKdy0lSd2hPlgFwVuW1CBkfEs9PfDQsQzZghLs/psdg==";
+            url = "https://registry.npmjs.org/needle/-/needle-2.4.0.tgz";
+            sha512 = "4Hnwzr3mi5L97hMYeNl8wRW/Onhy4nUKR/lVemJ8gJedxxUyBLm9kkrDColJvoSfwi0jCNhD+xCdOtiGDQiRZg==";
           };
         };
         node-pre-gyp = {
@@ -3264,10 +3264,10 @@
         npm-packlist = {
           name = "npm-packlist";
           packageName = "npm-packlist";
-          version = "1.4.1";
+          version = "1.4.4";
           tarball = {
-            url = "https://registry.npmjs.org/npm-packlist/-/npm-packlist-1.4.1.tgz";
-            sha512 = "+TcdO7HJJ8peiiYhvPxsEDhF3PJFGUGRcFsGve3vxvxdcpO2Z4Z7rkosRM0kWj6LfbK/P0gu3dzk5RU1ffvFcw==";
+            url = "https://registry.npmjs.org/npm-packlist/-/npm-packlist-1.4.4.tgz";
+            sha512 = "zTLo8UcVYtDU3gdeaFu2Xu0n0EvelfHDGuqtNIn5RO7yQj4H1TqNdBc/yZjxnWA0PVB8D3Woyp0i5B43JwQ6Vw==";
           };
         };
         npmlog = {
@@ -3345,10 +3345,10 @@
         process-nextick-args = {
           name = "process-nextick-args";
           packageName = "process-nextick-args";
-          version = "2.0.0";
+          version = "2.0.1";
           tarball = {
-            url = "https://registry.npmjs.org/process-nextick-args/-/process-nextick-args-2.0.0.tgz";
-            sha512 = "MtEC1TqN0EU5nephaJ4rAtThHtC86dNN9qCuEhtshvpVBkAW5ZO7BASN9REnF9eoXGcRub+pFuKEpOHE+HbEMw==";
+            url = "https://registry.npmjs.org/process-nextick-args/-/process-nextick-args-2.0.1.tgz";
+            sha512 = "3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==";
           };
         };
         rc = {
@@ -3491,10 +3491,10 @@
         tar = {
           name = "tar";
           packageName = "tar";
-          version = "4.4.8";
+          version = "4.4.10";
           tarball = {
-            url = "https://registry.npmjs.org/tar/-/tar-4.4.8.tgz";
-            sha512 = "LzHF64s5chPQQS0IYBn9IN5h3i98c12bo4NCO7e0sGM2llXQ3p2FGC5sdENN4cTW48O915Sh+x+EXx7XW96xYQ==";
+            url = "https://registry.npmjs.org/tar/-/tar-4.4.10.tgz";
+            sha512 = "g2SVs5QIxvo6OLp0GudTqEf05maawKUxXru104iaayWA09551tFCTI8f1Asb4lPfkBr91k07iL4c11XO3/b0tA==";
           };
         };
         util-deprecate = {
@@ -3552,7 +3552,7 @@
         url = "https://registry.npmjs.org/glob-parent/-/glob-parent-3.1.0.tgz";
         sha1 = "nmr2KZ2NO9K9QEMIMr0RPfkGxa4=";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         is-glob = {
           name = "is-glob";
           packageName = "is-glob";
@@ -3599,7 +3599,7 @@
         url = "https://registry.npmjs.org/has-values/-/has-values-1.0.0.tgz";
         sha1 = "lbC2P+whRmGab+V/51Yo1aOe/k8=";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         kind-of = {
           name = "kind-of";
           packageName = "kind-of";
@@ -3628,7 +3628,7 @@
         url = "https://registry.npmjs.org/is-accessor-descriptor/-/is-accessor-descriptor-0.1.6.tgz";
         sha1 = "qeEss66Nh2cn7u84Q/igiXtcmNY=";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         kind-of = {
           name = "kind-of";
           packageName = "kind-of";
@@ -3666,7 +3666,7 @@
         url = "https://registry.npmjs.org/is-data-descriptor/-/is-data-descriptor-0.1.4.tgz";
         sha1 = "C17mSDiOLIYCgueT8YVv7D8wG1Y=";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         kind-of = {
           name = "kind-of";
           packageName = "kind-of";
@@ -3686,7 +3686,7 @@
         url = "https://registry.npmjs.org/is-descriptor/-/is-descriptor-0.1.6.tgz";
         sha512 = "avDYr0SB3DwO9zsMov0gKCESFYqCnE4hq/4z3TdUlukEy5t9C0YRq7HLrsN52NAcqXKaepeCD0n+B0arnVG3Hg==";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         kind-of = {
           name = "kind-of";
           packageName = "kind-of";
@@ -3733,7 +3733,7 @@
         url = "https://registry.npmjs.org/is-number/-/is-number-3.0.0.tgz";
         sha1 = "JP1iAaR4LPUFYcgQJ2r8fRLXEZU=";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         kind-of = {
           name = "kind-of";
           packageName = "kind-of";
@@ -3822,7 +3822,7 @@
         url = "https://registry.npmjs.org/json5/-/json5-2.1.0.tgz";
         sha512 = "8Mh9h6xViijj36g7Dxi+Y4S6hNGV96vcJZr/SrlHh1LR/pEn/8j/+qIBbs44YKl69Lrfctp4QD+AdWLTMqEZAQ==";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         minimist = {
           name = "minimist";
           packageName = "minimist";
@@ -3846,10 +3846,10 @@
     lodash = {
       name = "lodash";
       packageName = "lodash";
-      version = "4.17.11";
+      version = "4.17.15";
       tarball = {
-        url = "https://registry.npmjs.org/lodash/-/lodash-4.17.11.tgz";
-        sha512 = "cQKh8igo5QUhZ7lg38DYWAxMvjSAKG0A8wGSVimP07SIUEK2UO+arSRKbRZWtelMtN5V0Hkwh5ryOto/SshYIg==";
+        url = "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz";
+        sha512 = "8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==";
       };
     };
     loose-envify = {
@@ -3894,12 +3894,12 @@
     mixin-deep = {
       name = "mixin-deep";
       packageName = "mixin-deep";
-      version = "1.3.1";
+      version = "1.3.2";
       tarball = {
-        url = "https://registry.npmjs.org/mixin-deep/-/mixin-deep-1.3.1.tgz";
-        sha512 = "8ZItLHeEgaqEvd5lYBXfm4EZSFCX29Jb9K+lAHhDKzReKBQKj3R+7NOF6tjqYi9t4oI8VUfaWITJQm86wnXGNQ==";
+        url = "https://registry.npmjs.org/mixin-deep/-/mixin-deep-1.3.2.tgz";
+        sha512 = "WRoDn//mXBiJ1H40rqa3vH0toePwSsGb45iInWlTySa+Uu4k3tYUSxa2v1KqAiLtvlrSzaExqS1gtk96A9zvEA==";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         is-extendable = {
           name = "is-extendable";
           packageName = "is-extendable";
@@ -3955,7 +3955,7 @@
         url = "https://registry.npmjs.org/object-copy/-/object-copy-0.1.0.tgz";
         sha1 = "fn2Fi3gb18mRpBupde04EnVOmYw=";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         define-property = {
           name = "define-property";
           packageName = "define-property";
@@ -4125,7 +4125,7 @@
         url = "https://registry.npmjs.org/regjsparser/-/regjsparser-0.6.0.tgz";
         sha512 = "RQ7YyokLiQBomUJuUG8iGVvkgOLxwyZM8k6d3q5SAXpg4r5TZJZigKFvC6PpD+qQ98bCDC5YelPeA3EucDoNeQ==";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         jsesc = {
           name = "jsesc";
           packageName = "jsesc";
@@ -4197,12 +4197,12 @@
     set-value = {
       name = "set-value";
       packageName = "set-value";
-      version = "2.0.0";
+      version = "2.0.1";
       tarball = {
-        url = "https://registry.npmjs.org/set-value/-/set-value-2.0.0.tgz";
-        sha512 = "hw0yxk9GT/Hr5yJEYnHNKYXkIA8mVJgd9ditYZCe16ZczcaELYYcfvaXesNACk2O8O0nTiPQcQhGUQj8JLzeeg==";
+        url = "https://registry.npmjs.org/set-value/-/set-value-2.0.1.tgz";
+        sha512 = "JxHc1weCN68wRY0fhCoXpyK55m/XPHafOmK4UWD7m2CI14GMcFypt4w/0+NV5f/ZMby2F6S2wwA7fgynh9gWSw==";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         extend-shallow = {
           name = "extend-shallow";
           packageName = "extend-shallow";
@@ -4231,7 +4231,7 @@
         url = "https://registry.npmjs.org/snapdragon/-/snapdragon-0.8.2.tgz";
         sha512 = "FtyOnWN/wCHTVXOMwvSv26d+ko5vWlIDD6zoUJ7LW8vh+ZBC8QdljveRP+crNrtBwioEUWy/4dMtbBjA4ioNlg==";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         debug = {
           name = "debug";
           packageName = "debug";
@@ -4278,7 +4278,7 @@
         url = "https://registry.npmjs.org/snapdragon-node/-/snapdragon-node-2.1.1.tgz";
         sha512 = "O27l4xaMYt/RSQ5TR3vpWCAB5Kb/czIcqUFOM/C4fYcLnbZUc1PkjTAMjof2pBWaSTwOUd6qUHcFGVGj7aIwnw==";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         define-property = {
           name = "define-property";
           packageName = "define-property";
@@ -4325,7 +4325,7 @@
         url = "https://registry.npmjs.org/snapdragon-util/-/snapdragon-util-3.0.1.tgz";
         sha512 = "mbKkMdQKsjX4BAL4bRYTj21edOf8cN7XHdYUJEe+Zn99hVEYcMvKPct1IqNe7+AZPirn8BCDOQBHQZknqmKlZQ==";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         kind-of = {
           name = "kind-of";
           packageName = "kind-of";
@@ -4381,7 +4381,7 @@
         url = "https://registry.npmjs.org/static-extend/-/static-extend-0.1.2.tgz";
         sha1 = "YICcOcv/VTNyJv1eC1IPNB8ftcY=";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         define-property = {
           name = "define-property";
           packageName = "define-property";
@@ -4419,7 +4419,7 @@
         url = "https://registry.npmjs.org/to-object-path/-/to-object-path-0.3.0.tgz";
         sha1 = "KXWIt7Dn4KwI4E5nL4XB9JmeF68=";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         kind-of = {
           name = "kind-of";
           packageName = "kind-of";
@@ -4502,7 +4502,7 @@
         url = "https://registry.npmjs.org/union-value/-/union-value-1.0.0.tgz";
         sha1 = "XHHDTLW61dzr4+oM0IIHulqhrqQ=";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         extend-shallow = {
           name = "extend-shallow";
           packageName = "extend-shallow";
@@ -4531,7 +4531,7 @@
         url = "https://registry.npmjs.org/unset-value/-/unset-value-1.0.0.tgz";
         sha1 = "g3aHP30jNRef+x5vw6jtDfyKtVk=";
       };
-      privateDevDependencies = {
+      privateDependencies = {
         has-value = {
           name = "has-value";
           packageName = "has-value";
@@ -4540,7 +4540,7 @@
             url = "https://registry.npmjs.org/has-value/-/has-value-0.3.1.tgz";
             sha1 = "ex9YutpiyoJ+wKIHgCVlSEWZXh8=";
           };
-          privateDevDependencies = {
+          privateDependencies = {
             isobject = {
               name = "isobject";
               packageName = "isobject";
