@@ -10,7 +10,6 @@
   gzip,
   bzip2,
   rsync,
-  npm-package-to-nix,
   ...
 }:
 
