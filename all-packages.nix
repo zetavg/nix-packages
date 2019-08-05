@@ -53,6 +53,11 @@ let
     nginx-mod-passenger = callPackage ./pkgs/servers/nginx-mod-passenger.nix { };
     nginx-with-passenger = callPackage ./pkgs/servers/nginx-with-passenger.nix { };
 
+    elastic-apm-server = callPackage ./pkgs/servers/monitoring/elastic-apm-server { };
+    elastic-apm-server-oss = callPackage ./pkgs/servers/monitoring/elastic-apm-server {
+      enableUnfree = false;
+    };
+
     sample-rails-app = callPackage (
       builtins.fetchGit {
         url = "https://github.com/zetavg/rails-nix-sample.git";
