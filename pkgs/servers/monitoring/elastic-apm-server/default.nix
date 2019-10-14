@@ -57,6 +57,7 @@ in stdenv.mkDerivation (rec {
     mkdir -p $out/{bin,share}
     cp apm-server $out/bin
     cp -r apm-server.yml fields.yml kibana $out/share
+    cp -r ingest $out/share 2>/dev/null || :
   '';
 
   passthru = { inherit enableUnfree; };
