@@ -8,14 +8,28 @@ sudo: false
 #     - NUR_REPO=
 
 matrix:
-  include:
+  fast_finish: true
+  allow_failures:
     - env: NIX_CHANNEL=https://nixos.org/channels/nixpkgs-unstable
       os: osx
       sudo: true
-    - env: NIX_CHANNEL=https://nixos.org/channels/nixpkgs-unstable
     - env: NIX_CHANNEL=https://nixos.org/channels/nixos-unstable
-    - env: NIX_CHANNEL=https://nixos.org/channels/nixos-18.09
+  # Test against different versions of nixpkgs.
+  # The version names used here came from the name of branches
+  # in https://github.com/NixOS/nixpkgs-channels.
+  include:
+    # unstable
+    - env: NIX_CHANNEL=https://nixos.org/channels/nixpkgs-unstable
+      os: osx
+      sudo: true
+    - env: NIX_CHANNEL=https://nixos.org/channels/nixos-unstable
+    # 19.03
+    - env: NIX_CHANNEL=https://nixos.org/channels/nixpkgs-19.03-darwin
+      os: osx
+      sudo: true
     - env: NIX_CHANNEL=https://nixos.org/channels/nixos-19.03
+    # 18.09
+    - env: NIX_CHANNEL=https://nixos.org/channels/nixos-18.09
     # Nixpkgs version < 19.03 dosen't support "appendOverlays", so
     # "manuallyAppendOverlaysToPkgs" is used to import the whole package.
     # They're actually different, so here we test to USE_AS_OVERLAY as normal.
