@@ -23,11 +23,11 @@ matrix:
       os: osx
       sudo: true
     - env: NIX_CHANNEL=https://nixos.org/channels/nixos-unstable
-    # 19.03
-    - env: NIX_CHANNEL=https://nixos.org/channels/nixpkgs-19.03-darwin
+    # 19.09
+    - env: NIX_CHANNEL=https://nixos.org/channels/nixpkgs-19.09-darwin
       os: osx
       sudo: true
-    - env: NIX_CHANNEL=https://nixos.org/channels/nixos-19.03
+    - env: NIX_CHANNEL=https://nixos.org/channels/nixos-19.09
     # 18.09
     - env: NIX_CHANNEL=https://nixos.org/channels/nixos-18.09
     # Nixpkgs version < 19.03 dosen't support "appendOverlays", so
