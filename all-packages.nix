@@ -62,7 +62,7 @@ let
       builtins.fetchGit {
         url = "https://github.com/zetavg/rails-nix-sample.git";
         ref = "master";
-        rev = "22b727b95ea7c9e5eca013a794e0d526caa7f4d5";
+        rev = "d92e60eee96aeb68ece6ef0fe96020f4235a08ba";
       }
     ) { inherit pkgs buildRailsApp; };
 
