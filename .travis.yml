@@ -23,6 +23,12 @@ matrix:
       os: osx
       sudo: true
     - env: NIX_CHANNEL=https://nixos.org/channels/nixos-unstable
+    # 20.03
+    # Not yet?
+    # - env: NIX_CHANNEL=https://nixos.org/channels/nixpkgs-20.03-darwin
+    #   os: osx
+    #   sudo: true
+    - env: NIX_CHANNEL=https://nixos.org/channels/nixos-20.03
     # 19.09
     - env: NIX_CHANNEL=https://nixos.org/channels/nixpkgs-19.09-darwin
       os: osx
@@ -38,22 +44,23 @@ matrix:
       - USE_AS_OVERLAY=true
 
 install:
-  - if [ -n "${CACHIX_CACHE}" -a "Darwin" = "$(uname)" ]; then
-      echo "trusted-users = root $USER" | sudo tee -a /etc/nix/nix.conf;
-      sudo pkill nix-daemon;
-      sudo nix-daemon & :;
-    fi
-  - if [ -n "${CACHIX_CACHE}" ]; then travis_retry nix-channel --update; fi
-  - if [ -n "${CACHIX_CACHE}" ]; then nix-env -iA cachix -f https://cachix.org/api/v1/install; fi
-  - if [ -n "${CACHIX_CACHE}" ]; then cachix use "${CACHIX_CACHE}"; fi
   - mkdir -p ~/.nixpkgs &&
     echo "{ allowBroken = true; allowUnfree = true; allowUnsupportedSystem = true; }" > ~/.nixpkgs/config.nix
   - nix-channel --add "${NIX_CHANNEL}" nixpkgs
   - travis_retry nix-channel --update
   - nix --version
   - nix-instantiate --eval -E 'with import <nixpkgs> {}; lib.version or lib.nixpkgsVersion'
+  - if [ -n "${CACHIX_CACHE}" -a "Darwin" = "$(uname)" ]; then
+      echo "trusted-users = root $USER" | sudo tee -a /etc/nix/nix.conf;
+      sudo pkill nix-daemon;
+      sudo nix-daemon & :;
+    fi
+  - if [ -n "${CACHIX_CACHE}" ]; then nix-env -iA cachix -f https://cachix.org/api/v1/install; fi
+  - if [ -n "${CACHIX_CACHE}" ]; then cachix use "${CACHIX_CACHE}"; fi
 
 script:
+  - nix --version
+  - nix-instantiate --eval -E 'with import <nixpkgs> {}; lib.version or lib.nixpkgsVersion'
   - nix-build ci.nix -A buildOutputs
   # - nix eval -f default.nix 'lib'
   # - nix eval -f default.nix 'modules'
