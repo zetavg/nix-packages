@@ -17,6 +17,7 @@
   lsof,
   procps,
   beep,
+  gnumake,
   version ? "6.0.4",
   optimizations ? true,
   sha256s ? import ./sha256s.nix,
@@ -73,7 +74,7 @@ in stdenv.mkDerivation rec {
     ./patches/dont-write-to-build-system-dir.patch
   ];
   commandStringsInSourceCodePatch = import ./patches/commandStringsInSourceCodePatch.nix {
-    inherit coreutils findutils bash lsof procps;
+    inherit coreutils findutils bash lsof procps gnumake curl;
     beep = if stdenv.isDarwin then "" else beep;
   };
   postPatch = ''

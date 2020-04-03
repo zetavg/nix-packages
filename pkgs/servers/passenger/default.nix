@@ -17,6 +17,7 @@
   lsof,
   procps,
   beep,
+  gnumake,
   version ? "6.0.4",
   optimizations ? true,
   buildStandalone ? true,
@@ -31,7 +32,7 @@ let
   # rebuild those fundamental stuff over and over again
   passenger-minimal = import ./minimal.nix {
     # TODO: Better way of doing this?
-    inherit lib system stdenv fetchurl ruby bundler rake gcc curl openssl zlib pcre coreutils findutils bash lsof procps beep version optimizations sha256s;
+    inherit lib system stdenv fetchurl ruby bundler rake gcc curl openssl zlib pcre coreutils findutils bash lsof procps beep gnumake version optimizations sha256s;
   };
 
   getPrefetchedFilesJson = import ./getPrefetchedFilesJson.nix { inherit lib fetchurl; };

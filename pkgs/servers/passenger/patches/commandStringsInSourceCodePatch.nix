@@ -1,4 +1,4 @@
-{ coreutils, findutils, bash, lsof, procps, beep, ... }:
+{ coreutils, findutils, bash, lsof, procps, beep, gnumake, curl, ... }:
 
 ''
 --- ./src/agent/Core/SpawningKit/Exceptions.h
@@ -139,4 +139,47 @@
  				pidsArg.c_str(),
  			#endif
 
+--- ./src/ruby_supportlib/phusion_passenger/native_support.rb
++++ ./src/ruby_supportlib/phusion_passenger/native_support.rb
+@@ -245,7 +245,8 @@ def installation_target_dirs
+       if (output_dir = ENV['PASSENGER_NATIVE_SUPPORT_OUTPUT_DIR']) && !output_dir.empty?
+         target_dirs << "#{output_dir}/#{VERSION_STRING}/#{archdir}"
+       end
+-      if PhusionPassenger.build_system_dir
++      # PhusionPassenger.build_system_dir will not be writeable in a Nix Store
++      if ENV['PASSENGER_ALLOW_WRITE_TO_BUILD_SYSTEM_DIR'] && PhusionPassenger.build_system_dir
+         target_dirs << "#{PhusionPassenger.build_system_dir}/buildout/ruby/#{archdir}"
+       end
+       target_dirs << "#{PhusionPassenger.home_dir}/#{USER_NAMESPACE_DIRNAME}/native_support/#{VERSION_STRING}/#{archdir}"
+@@ -340,7 +341,7 @@ def compile(target_dirs)
+               make_result =
+                 sh_nonfatal("#{PlatformInfo.ruby_command} #{Shellwords.escape extconf_rb}",
+                   options) &&
+-                sh_nonfatal("make", options)
++                sh_nonfatal("${gnumake}/bin/make", options)
+               if make_result
+                 begin
+                   FileUtils.cp_r(".", target_dir)
+
+--- ./src/ruby_supportlib/phusion_passenger/utils/download.rb
++++ //src/ruby_supportlib/phusion_passenger/utils/download.rb
+@@ -77,7 +101,8 @@ def download(url, output, options = {})
+           end
+         end
+
+-        if PlatformInfo.find_command("curl")
++        # We will use curl provided by Nix
++        if true || PlatformInfo.find_command("curl")
+           return download_with_curl(logger, url, output, options)
+         elsif PlatformInfo.find_command("wget")
+           return download_with_wget(logger, url, output, options)
+@@ -93,7 +118,7 @@ def basename_from_url(url)
+       end
+
+       def download_with_curl(logger, url, output, options)
+-        command = ["curl", "-f", "-L", "-o", output]
++        command = ["${curl}/bin/curl", "-f", "-L", "-o", output]
+         if options[:show_progress]
+           command << "-#"
+         else
 ''
