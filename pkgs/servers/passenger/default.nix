@@ -68,6 +68,7 @@ let
       pcre
     ];
 
+    PASSENGER_ALLOW_WRITE_TO_BUILD_SYSTEM_DIR = true;
     PREFETCHED_FILES_JSON = prefetchedFilesJson;
 
     configurePhase = ''

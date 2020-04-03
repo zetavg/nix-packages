@@ -1,0 +1,12 @@
+--- ./src/ruby_supportlib/phusion_passenger/native_support.rb
++++ ./src/ruby_supportlib/phusion_passenger/native_support.rb
+@@ -245,7 +245,8 @@ def installation_target_dirs
+       if (output_dir = ENV['PASSENGER_NATIVE_SUPPORT_OUTPUT_DIR']) && !output_dir.empty?
+         target_dirs << "#{output_dir}/#{VERSION_STRING}/#{archdir}"
+       end
+-      if PhusionPassenger.build_system_dir
++      # PhusionPassenger.build_system_dir will not be writeable in a Nix Store
++      if ENV['PASSENGER_ALLOW_WRITE_TO_BUILD_SYSTEM_DIR'] && PhusionPassenger.build_system_dir
+         target_dirs << "#{PhusionPassenger.build_system_dir}/buildout/ruby/#{archdir}"
+       end
+       target_dirs << "#{PhusionPassenger.home_dir}/#{USER_NAMESPACE_DIRNAME}/native_support/#{VERSION_STRING}/#{archdir}"

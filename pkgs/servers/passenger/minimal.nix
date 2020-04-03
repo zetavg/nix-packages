@@ -58,9 +58,9 @@ in stdenv.mkDerivation rec {
     pcre
   ];
 
+  PASSENGER_ALLOW_WRITE_TO_BUILD_SYSTEM_DIR = true;
   PASSENGER_AGENT_OPTIMIZE = if optimizations then "true" else "false";
   PREFETCHED_FILES_JSON = prefetchedFilesJson;
-  PASSENGER_ALLOW_COMPILE_NATIVE_SUPPORT = true;
 
   patches = [
     ./patches/simulate-process-euid-zero.patch
@@ -69,7 +69,7 @@ in stdenv.mkDerivation rec {
     ./patches/install-agent.patch
     ./patches/install-standalone-runtime.patch
     ./patches/dont-check-download-tool.patch
-    ./patches/disable-native-support-compile.patch
+    ./patches/dont-write-to-build-system-dir.patch
   ];
   commandStringsInSourceCodePatch = import ./patches/commandStringsInSourceCodePatch.nix {
     inherit coreutils findutils bash lsof procps;
@@ -82,9 +82,8 @@ in stdenv.mkDerivation rec {
   configurePhase = ''
     echo "${compileTimeLocationsIni}" > src/ruby_supportlib/phusion_passenger/locations.ini
   '';
-  # TODO: Do we need to prebuild native support for all Rubies?
   buildPhase = ''
-    echo 'Building native support...'
+    echo 'Building native support for default environment...'
     bin/passenger-config build-native-support
   '' + ''
     echo 'Building Passenger agent...'
