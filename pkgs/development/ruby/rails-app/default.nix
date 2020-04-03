@@ -112,6 +112,7 @@ let
       passenger_env_var GEM_HOME ${gemHome};
       passenger_env_var BUNDLE_GEMFILE ${bundleGemfile};
       passenger_env_var BUNDLE_PATH ${bundlePath};
+      passenger_env_var RUBYLIB '${bundleEnv.bundler}/lib/ruby/gems/${bundleEnv.bundler.ruby.version.libDir}/gems/${bundleEnv.bundler.name}/lib';
     '' + (
       if isFunction extraNginxPassengerConfig then extraNginxPassengerConfig { app = drv; }
       else if isString extraNginxPassengerConfig then extraNginxPassengerConfig
