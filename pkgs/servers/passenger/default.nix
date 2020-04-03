@@ -49,55 +49,58 @@ let
   nginxDownloadSha256 = sha256s.${nginxDownloadUrl};
   nginx = fetchurl { url = nginxDownloadUrl; sha256 = nginxDownloadSha256; };
 
-in stdenv.mkDerivation rec {
-  name = "passenger-${version}";
-  passthru = {
-    # TODO: Add more of these?
-    inherit optimizations ruby rake;
+  drv = stdenv.mkDerivation rec {
+    name = "passenger-${version}";
+    passthru = {
+      # TODO: Add more of these?
+      inherit optimizations ruby rake;
+    };
+
+    src = passenger-minimal;
+    buildInputs = [
+      ruby
+      bundler
+      rake
+      curl
+      gcc
+      openssl
+      zlib
+      pcre
+    ];
+
+    PREFETCHED_FILES_JSON = prefetchedFilesJson;
+
+    configurePhase = ''
+      echo "${compileTimeLocationsIni}" > src/ruby_supportlib/phusion_passenger/locations.ini
+    '';
+
+    buildPhase = ''
+    '' + lib.optionalString buildStandalone ''
+      echo 'Building Passenger standalone runtime...'
+      bin/passenger-config install-standalone-runtime --nginx-version ${preferredNginxVersion} --nginx-tarball ${nginx}
+    '' + lib.optionalString buildNginxSupportFiles ''
+      echo 'Building Nginx support files...'
+      rake nginx
+    '' + lib.optionalString buildApache2Module ''
+      echo 'Building Apache 2 module...'
+      rake apache2
+    '';
+    installPhase = ''
+      cp -r . $out
+    '';
+
+    preFixup = ''
+      echo "${outputLocationsIni}" > "$out/src/ruby_supportlib/phusion_passenger/locations.ini"
+    '';
+
+    meta = with lib; {
+      description = "A fast and robust web application server for Ruby, Python and Node.js that runs and automanages your apps with ease";
+      homepage    = https://www.phusionpassenger.com/;
+      license     = licenses.mit;
+      platforms   = platforms.all;
+      broken      = stdenv.isDarwin;
+    };
   };
-
-  src = passenger-minimal;
-  buildInputs = [
-    ruby
-    bundler
-    rake
-    curl
-    gcc
-    openssl
-    zlib
-    pcre
-  ];
-
-  PREFETCHED_FILES_JSON = prefetchedFilesJson;
-
-  configurePhase = ''
-    echo "${compileTimeLocationsIni}" > src/ruby_supportlib/phusion_passenger/locations.ini
-  '';
-
-  buildPhase = ''
-  '' + lib.optionalString buildStandalone ''
-    echo 'Building Passenger standalone runtime...'
-    bin/passenger-config install-standalone-runtime --nginx-version ${preferredNginxVersion} --nginx-tarball ${nginx}
-  '' + lib.optionalString buildNginxSupportFiles ''
-    echo 'Building Nginx support files...'
-    rake nginx
-  '' + lib.optionalString buildApache2Module ''
-    echo 'Building Apache 2 module...'
-    rake apache2
-  '';
-  installPhase = ''
-    cp -r . $out
-  '';
-
-  preFixup = ''
-    echo "${outputLocationsIni}" > "$out/src/ruby_supportlib/phusion_passenger/locations.ini"
-  '';
-
-  meta = with lib; {
-    description = "A fast and robust web application server for Ruby, Python and Node.js that runs and automanages your apps with ease";
-    homepage    = https://www.phusionpassenger.com/;
-    license     = licenses.mit;
-    platforms   = platforms.all;
-    broken      = stdenv.isDarwin;
-  };
+in drv // {
+  nodejs_supportlib = "${drv.outPath}/src/nodejs_supportlib";
 }
