@@ -1,4 +1,4 @@
-{ coreutils, findutils, bash, lsof, procps, beep, gnumake, curl, ... }:
+{ coreutils, findutils, bash, lsof, procps, beep, gcc, gnumake, curl, ... }:
 
 ''
 --- ./src/agent/Core/SpawningKit/Exceptions.h
@@ -139,6 +139,20 @@
  				pidsArg.c_str(),
  			#endif
 
+--- ./src/ruby_native_extension/extconf.rb
++++ ./src/ruby_native_extension/extconf.rb
+@@ -28,6 +28,10 @@
+   RbConfig::CONFIG["rubyarchhdrdir"].sub!(RUBY_PLATFORM.split('-').last, Dir.entries(File.dirname(RbConfig::CONFIG["rubyarchhdrdir"])).reject{|d|d.start_with?(".","ruby")}.first.split('-').last)
+ end
+
++RbConfig::CONFIG['CPP'] = '${gcc}/bin/cpp'
++RbConfig::CONFIG['CC'] = '${gcc}/bin/gcc'
++RbConfig::CONFIG['CXX'] = '${gcc}/bin/g++'
++
+ require 'mkmf'
+
+ $LIBS << " -lpthread" if $LIBS !~ /-lpthread/
+
 --- ./src/ruby_supportlib/phusion_passenger/native_support.rb
 +++ ./src/ruby_supportlib/phusion_passenger/native_support.rb
 @@ -340,7 +341,7 @@ def compile(target_dirs)
@@ -146,7 +160,7 @@
                  sh_nonfatal("#{PlatformInfo.ruby_command} #{Shellwords.escape extconf_rb}",
                    options) &&
 -                sh_nonfatal("make", options)
-+                sh_nonfatal("${gnumake}/bin/make", options)
++                sh_nonfatal("PATH=${coreutils}/bin:${gcc}/bin ${gnumake}/bin/make", options)
                if make_result
                  begin
                    FileUtils.cp_r(".", target_dir)

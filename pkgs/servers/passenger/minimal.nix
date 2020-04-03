@@ -74,7 +74,7 @@ in stdenv.mkDerivation rec {
     ./patches/dont-write-to-build-system-dir.patch
   ];
   commandStringsInSourceCodePatch = import ./patches/commandStringsInSourceCodePatch.nix {
-    inherit coreutils findutils bash lsof procps gnumake curl;
+    inherit coreutils findutils bash lsof procps gcc gnumake curl;
     beep = if stdenv.isDarwin then "" else beep;
   };
   postPatch = ''
