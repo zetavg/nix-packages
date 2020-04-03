@@ -11,7 +11,7 @@
 +
 +          unless has_available_file
 +            logger.error "Resource #{url} is required but has not been downloaded"
-+            logger.info "PREFETCHED_FILES_JSON: #{PREFETCHED_FILES_JSON}"
++            logger.info "PREFETCHED_FILES_JSON: #{ENV['PREFETCHED_FILES_JSON']}"
 +            return false
 +          end
 +
