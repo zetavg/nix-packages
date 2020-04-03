@@ -50,6 +50,7 @@ let
     buildRailsApp = callPackage ./pkgs/development/ruby/rails-app { };
 
     passenger = callPackage ./pkgs/servers/passenger { };
+    passenger-minimal = callPackage ./pkgs/servers/passenger/minimal.nix { };
     nginx-mod-passenger = callPackage ./pkgs/servers/nginx-mod-passenger.nix { };
     nginx-with-passenger = callPackage ./pkgs/servers/nginx-with-passenger.nix { };
 

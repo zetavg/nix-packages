@@ -22,24 +22,24 @@
 -          return false
 -        end
 +        require 'json'
-+        available_binaries = JSON.parse(ENV['PREFETCHED_FILES_JSON'])
-+        has_available_binary = available_binaries.key? url
++        available_files = JSON.parse(ENV['PREFETCHED_FILES_JSON'])
++        has_available_file = available_files.key? url
 +
-+        unless has_available_binary
-+          logger.info "No avaliable binary downloaded for #{url}"
++        unless has_available_file
++          logger.error "Resource #{url} is required but has not been downloaded"
++          logger.info "PREFETCHED_FILES_JSON: #{PREFETCHED_FILES_JSON}"
 +          return false
 +        end
 +
-+        src = available_binaries[url]
++        src = available_files[url]
 +
 +        unless File.exist?(src)
-+          logger.info "Cannot find downloaded binary at #{src}"
++          logger.info "Cannot find downloaded file at #{src}"
 +          return false
 +        end
 +
 +        logger.info "Copying #{src} to #{output}..."
 +        FileUtils.cp(src, output)
-+        puts PhusionPassenger.support_binaries_dir
 +
 +        return true
        end

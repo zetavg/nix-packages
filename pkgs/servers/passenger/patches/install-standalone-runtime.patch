@@ -1,0 +1,22 @@
+--- ./src/ruby_supportlib/phusion_passenger/config/install_standalone_runtime_command.rb
++++ ./src/ruby_supportlib/phusion_passenger/config/install_standalone_runtime_command.rb
+@@ -58,7 +58,8 @@ def run
+         sanity_check
+         PhusionPassenger::Utils.mktmpdir("passenger-install.", PlatformInfo.tmpexedir) do |tmpdir|
+           install_agent(tmpdir)
+-          if !download_nginx_engine
++          # Nginx has to be compiled under a Nix environment
++          if true || !download_nginx_engine
+             compile_nginx_engine(tmpdir)
+           end
+         end
+@@ -259,7 +260,8 @@ def compile_nginx_engine(tmpdir)
+         puts "---------------------------------------"
+         puts
+         if @options[:compile]
+-          puts "No precompiled Nginx engine could be downloaded. Compiling it from source instead."
++          # puts "No precompiled Nginx engine could be downloaded. Compiling it from source instead."
++          puts "Compiling Nginx engine from source."
+           puts
+           args = @options[:compile_args].dup
+           args << "--working-dir"

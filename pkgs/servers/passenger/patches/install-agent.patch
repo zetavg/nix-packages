@@ -1,0 +1,22 @@
+--- ./src/ruby_supportlib/phusion_passenger/config/install_agent_command.rb
++++ ./src/ruby_supportlib/phusion_passenger/config/install_agent_command.rb
+@@ -50,7 +50,8 @@ def run
+         parse_options
+         initialize_objects
+         sanity_check
+-        if !download
++        # Phusion Passenger agent has to be compiled under a Nix environment
++        if true || !download
+           compile
+         end
+       end
+@@ -178,7 +179,8 @@ def compile
+         puts "---------------------------------------"
+         puts
+         if @options[:compile]
+-          puts "The #{PROGRAM_NAME} agent binary could not be downloaded. Compiling it from source instead."
++          # puts "The #{PROGRAM_NAME} agent binary could not be downloaded. Compiling it from source instead."
++          puts "Compiling the #{PROGRAM_NAME} agent binary from source."
+           puts
+           CompileAgentCommand.new(@options[:compile_args]).run
+         else

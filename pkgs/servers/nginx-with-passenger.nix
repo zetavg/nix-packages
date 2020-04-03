@@ -1,6 +1,8 @@
-{ stdenv, nginx, nginx-mod-passenger }:
+{ stdenv, nginx, passenger }:
 
-(nginx.override {
+let
+  nginx-mod-passenger = import ./nginx-mod-passenger.nix { inherit nginx passenger; };
+in (nginx.override {
    modules = [ nginx-mod-passenger ];
 }).overrideAttrs (oldAttrs: {
   meta = oldAttrs.meta // {

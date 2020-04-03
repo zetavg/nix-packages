@@ -1,0 +1,12 @@
+--- ./src/ruby_supportlib/phusion_passenger/config/installation_utils.rb
++++ ./src/ruby_supportlib/phusion_passenger/config/installation_utils.rb
+@@ -82,6 +82,9 @@ def find_or_create_writable_support_binaries_dir!
+       end
+
+       def check_for_download_tool!
++        # Download tool cannot be used under a Nix environment, skip check
++        return
++
+         PlatformInfo::Depcheck.load('depcheck_specs/utilities')
+         result = PlatformInfo::Depcheck.find('download-tool').check
+         # Don't output anything if there is a download tool.

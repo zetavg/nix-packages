@@ -1,9 +1,13 @@
-{ passenger, ruby, rake }:
+{ nginx, passenger }:
 
 let
-  psg = passenger.override { buildNginxSupportFiles = true; };
+  nginx-passenger = passenger.override {
+    buildNginxSupportFiles = true;
+    buildStandalone = false;
+    buildApache2Module = false;
+  };
 in {
-  src = "${psg}/src/nginx_module";
-  inputs = [ psg ruby rake ];
-  passenger = psg;
+  src = "${nginx-passenger}/src/nginx_module";
+  inputs = [ nginx-passenger nginx-passenger.ruby nginx-passenger.rake ];
+  passenger = nginx-passenger;
 }
