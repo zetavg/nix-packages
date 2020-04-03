@@ -1,47 +1,33 @@
 --- ./src/ruby_supportlib/phusion_passenger/utils/download.rb
 +++ ./src/ruby_supportlib/phusion_passenger/utils/download.rb
-@@ -68,23 +68,27 @@
+@@ -68,6 +68,30 @@ def download(url, output, options = {})
          }.merge(options)
          logger = options[:logger] || Logger.new(STDERR)
 
--        if options[:use_cache] && cache_dir = PhusionPassenger.download_cache_dir
--          basename = basename_from_url(url)
--          if File.exist?("#{cache_dir}/#{basename}")
--            logger.info "Copying #{basename} from #{cache_dir}..."
--            FileUtils.cp("#{cache_dir}/#{basename}", output)
--            return true
--          end
--        end
--
--        if PlatformInfo.find_command("curl")
--          return download_with_curl(logger, url, output, options)
--        elsif PlatformInfo.find_command("wget")
--          return download_with_wget(logger, url, output, options)
--        else
--          logger.error "Could not download #{url}: no download tool found (curl or wget required)"
--          return false
--        end
-+        require 'json'
-+        available_files = JSON.parse(ENV['PREFETCHED_FILES_JSON'])
-+        has_available_file = available_files.key? url
++        if ENV['PASSENGER_USE_PREFETCHED_FILES']
++          require 'json'
++          available_files = JSON.parse(ENV['PREFETCHED_FILES_JSON'])
++          has_available_file = available_files.key? url
 +
-+        unless has_available_file
-+          logger.error "Resource #{url} is required but has not been downloaded"
-+          logger.info "PREFETCHED_FILES_JSON: #{PREFETCHED_FILES_JSON}"
-+          return false
++          unless has_available_file
++            logger.error "Resource #{url} is required but has not been downloaded"
++            logger.info "PREFETCHED_FILES_JSON: #{PREFETCHED_FILES_JSON}"
++            return false
++          end
++
++          src = available_files[url]
++
++          unless File.exist?(src)
++            logger.info "Cannot find downloaded file at #{src}"
++            return false
++          end
++
++          logger.info "Copying #{src} to #{output}..."
++          FileUtils.cp(src, output)
++
++          return true
 +        end
 +
-+        src = available_files[url]
-+
-+        unless File.exist?(src)
-+          logger.info "Cannot find downloaded file at #{src}"
-+          return false
-+        end
-+
-+        logger.info "Copying #{src} to #{output}..."
-+        FileUtils.cp(src, output)
-+
-+        return true
-       end
-
-     private
+         if options[:use_cache] && cache_dir = PhusionPassenger.download_cache_dir
+           basename = basename_from_url(url)
+           if File.exist?("#{cache_dir}/#{basename}")

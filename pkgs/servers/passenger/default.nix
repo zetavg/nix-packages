@@ -69,6 +69,7 @@ let
     ];
 
     PASSENGER_ALLOW_WRITE_TO_BUILD_SYSTEM_DIR = true;
+    PASSENGER_USE_PREFETCHED_FILES = true;
     PREFETCHED_FILES_JSON = prefetchedFilesJson;
 
     configurePhase = ''

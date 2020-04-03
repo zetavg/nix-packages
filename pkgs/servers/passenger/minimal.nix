@@ -60,6 +60,7 @@ in stdenv.mkDerivation rec {
 
   PASSENGER_ALLOW_WRITE_TO_BUILD_SYSTEM_DIR = true;
   PASSENGER_AGENT_OPTIMIZE = if optimizations then "true" else "false";
+  PASSENGER_USE_PREFETCHED_FILES = true;
   PREFETCHED_FILES_JSON = prefetchedFilesJson;
 
   patches = [
