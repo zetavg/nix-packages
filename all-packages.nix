@@ -59,6 +59,8 @@ let
       enableUnfree = false;
     };
 
+    elastic-app-search = callPackage ./pkgs/applications/search/elastic-app-search { };
+
     sample-rails-app = callPackage (
       builtins.fetchGit {
         url = "https://github.com/zetavg/rails-nix-sample.git";
