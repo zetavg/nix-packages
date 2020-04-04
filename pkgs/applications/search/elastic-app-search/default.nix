@@ -3,6 +3,8 @@
   stdenvNoCC,
   fetchurl,
   bash,
+  coreutils,
+  gawk,
   adoptopenjdk-hotspot-bin-11,
   filebeat7,
   version ? "7.6.2",
@@ -39,7 +41,7 @@ in stdenvNoCC.mkDerivation {
 
   patches = [];
   pathsPatch = import ./patches/pathsPatch.nix {
-    inherit bash filebeat7 adoptopenjdk-hotspot-bin-11;
+    inherit bash coreutils gawk filebeat7 adoptopenjdk-hotspot-bin-11;
   };
   postPatch = ''
     echo "$pathsPatch" | patch -p0
